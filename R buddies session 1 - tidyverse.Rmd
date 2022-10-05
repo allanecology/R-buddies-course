@@ -45,8 +45,19 @@ summary(iris) #check if the data is really loaded
 
 ## Discussion
 
-- the installation of tidyverse package : exporting Markdown in .pdf, version of R where the package can't be installed, repository of packages is not found, on Mac : had to download a new software xcode. Generally, installing newer versions and restarting R works. Re-installing packages could be useful too. 
+- the installation of tidyverse package : version of R where the package can't be installed, repository of packages is not found, on Mac : had to download a new software xcode (iOS) and Rtools42. Windows : R software and win library sould be in same folder. Generally, installing newer versions and restarting R works. Re-installing packages could be useful too. 
 
-- Rmarkdown : markdown writing can allow the output to appear or not. Tutorial for R markdown : https://www.markdownguide.org/cheat-sheet or in Rstudio > Help.
+
+- Rmarkdown : 
+  - knitting RMarkdown in .pdf (requires LaTex, e.g. Tinytex)
+  - markdown writing can allow the chunk output to appear or not. Tutorial for R markdown : https://www.markdownguide.org/cheat-sheet or in Rstudio > Help.
+
+- RStudio hacks :
+  - Keyboard shortcuts under Help > Keyboard Shortcuts help (or Alt+Shift+K)
+  - Cheatsheets under Help > Cheat Sheets
+  - Change RStudio Appearance (Colors) under Tools > Global Options > Appearance
+  - Comment lines with Ctrl+Shift+C
+
+- use the `job()` function to run heavier parts of code in background
 
 - next session : look at vegan package for community ecology and tidyverse package, indicator processing. Make three groups for each topic. 
