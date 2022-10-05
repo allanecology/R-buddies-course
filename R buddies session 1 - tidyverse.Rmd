@@ -1,0 +1,52 @@
+---
+title: "R buddies session 1 - tidyverse"
+author: "Caroline"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R buddies session 1 : explore the tidyverse
+
+In this session, we decided to have a look at how data can be cleaned and organised with the package tidyverse. Tidyverse is a set of packages developped and maintained by Adley Wickham, for data analysis. It contains several very useful packages like tidyr, dplyr, ggplot2,etc... First things first, let's set our working directory and load iris data :
+
+```{r working directory, results='hide', warning=FALSE, message=FALSE}
+path<-"~/PhD/GitHub Repos/R-buddies-course"
+setwd(path)
+library(tidyverse)
+attach(iris)
+```
+
+## Data wrangling tutorials
+
+We followed two useful R tutorials to explain how to use tidyverse numeroous packages and functions. The tutorials can be found at :
+
+- tutorial 1 : https://www.datacamp.com/cheat-sheet/tidyverse-cheat-sheet-for-beginners
+
+- tutorial 2 : https://jhudatascience.org/tidyversecourse/wrangle-data.html
+
+(Thank you Noëlle for the nice links !)
+
+## Problems encountered and resolution
+
+### General tips for problems resolution 
+When R rends you an error message, you can try to solve it by yourself, check for any typo in your code (there are some typo in the tutorial !), or google the error message. 
+
+### Installation problems
+The function attach(iris) doesn't load the data in your environment but in you Rdata.
+
+```{r pressure, echo=TRUE}
+summary(iris) #check if the data is really loaded
+
+```
+
+## Discussion
+
+- the installation of tidyverse package : exporting Markdown in .pdf, version of R where the package can't be installed, repository of packages is not found, on Mac : had to download a new software xcode. Generally, installing newer versions and restarting R works. Re-installing packages could be useful too. 
+
+- Rmarkdown : markdown writing can allow the output to appear or not. Tutorial for R markdown : https://www.markdownguide.org/cheat-sheet or in Rstudio > Help.
+
+- next session : look at vegan package for community ecology and tidyverse package, indicator processing. Make three groups for each topic. 
