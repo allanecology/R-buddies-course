@@ -1,0 +1,119 @@
+---
+title: "Vegan package exploration"
+author: "Caroline"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(knitr.duplicate.label = "allow")
+```
+
+```{css, echo=FALSE}
+.scroll-200 {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: inherit;
+}
+```
+
+## (1) Package description
+
+The vegan package is a very useful package  for diversity analysis and communities description. It can be found in Github at https://github.com/vegandevs/vegan/ and additional documentations on the functions can be found here : https://cran.r-project.org/web/packages/vegan/vegan.pdf 
+
+```{r load package, message=F,warning=F, echo=T}
+library("vegan") #target package
+library("ape")
+library("dplyr") 
+library("ggplot2")
+library("tidyverse")# 4 extra useful packages
+```
+
+In order to cite the package and the correct version, you can use the following command
+
+```{r cite package, class.output="scroll-200"}
+citation("vegan")
+```
+
+## (2) What can I do with the vegan package ?
+
+#### (a) Communities descriptions
+
+It is important to realize that the vegan package is mainly used for descriptive analyses. It is a first step in describing your communities before taking them through an efficient modelling approach. However, it cannot be used as a replacement of hypotheses ! Results obtained through ordination/non-metric multidimensional scaling (NMDS) simply describe in a lower/multi dimension(s), patterns that arise from your data.
+
+Let's take an example and load the data that will be useful for this introduction
+
+```{r load data, class.output="scroll-200"}
+data("varespec") #this data is in the vegan package
+head(varespec)
+```
+
+This data is composed of different diversity samples. For each sample (rownames), every species abundance was recorded (colnames). This data presentation is typical for communities data.
+
+#### (b) Ordination
+
+The first thing you can do with the vegan package is the ordination of your communities. Follow this link for an extensive introduction to ordination with vegan : https://ourcodingclub.github.io/tutorials/ordination/
+
+
+```{r plot data, class.output="scroll-200"}
+#direct quick output for students in a hurry...
+#this is an NMDS for a specific distance calculation : Bray distance.
+NMDS3 <- metaMDS(varespec, k = 2, trymax = 100, trace = F, autotransform = FALSE, distance="bray")
+ef <- envfit(NMDS3, varespec, permu = 999)
+ef
+
+# The two last columns are of interest: the squared correlation coefficient and the associated p-value
+# Plot the vectors of the significant correlations and interpret the plot
+plot(NMDS3, type = "t", display = "sites")
+plot(ef, p.max = 0.05)
+```
+
+#### (c) Cluster analysis
+
+The second interesting thing you can do with the vegan package is a cluster analysis. The cluster analysis comes in 3 step : first, get a distance matrix, secondly, fit a cluster diagram, and thirdly, decide the optimal numbers of groups. Follow this ling for a useful tutorial on cluster analysis with vegan : https://www.introranger.org/post/cluster-analysis/
+
+```{r load second set of data, class.output="scroll-200", warning=FALSE}
+#yet another quick output if you are in a hurry...
+data("varechem") #this data is in the vegan package
+head(varechem)
+
+#first step
+chem_d <- select(varechem, N:Mo) #selecting interesting data
+chem_m <- round(vegdist(chem_d, method="euclidean"), 1) #fit distance matrice
+as.matrix(chem_m)[c(1:5), c(1:5)]#get matrix
+
+#second step
+chem_clust <- hclust(chem_m, method="ward.D2")  #cluster data
+plot(chem_clust, las = 1, 
+     main="Cluster diagram of soil chemistry", 
+     xlab="Sample", 
+     ylab="Euclidean distance")
+rect.hclust(chem_clust, 2, border="red") 
+rect.hclust(chem_clust, 4, border="blue")
+rect.hclust(chem_clust, 5, border="darkgreen") #plot clustered data with different clustering groups
+
+#third step
+fit <- cascadeKM(chem_d, 1, 10, iter = 5000)
+fit$results %>% 
+        as.data.frame() %>%
+        rownames_to_column("metric") %>%
+          pivot_longer(names_to = "groups", 
+                       values_to = "value", 
+                       - metric) %>%
+        mutate(groups = str_extract(groups, "\\d+"), 
+               groups = as.numeric(groups)) %>%
+  filter(metric != "SSE") %>%
+  ggplot(aes(x=groups, y = value)) + theme_bw(16) +
+  geom_line(lwd=1.5, col="blue") +
+  geom_point(pch=21, col="lightgrey", 
+             bg="blue", stroke = 1.5, size=5) +
+  scale_x_continuous(breaks = c(2:10), labels = c(2:10)) +
+  theme(panel.grid.minor.x = element_blank()) #estimate best group number for clustering
+grps <- as_tibble(fit$partition) #put them in a group variable
+plot(chem_clust, las = 1,
+     label = grps$`5 groups`, 
+  main="Cluster diagram of soil chemistry", 
+  xlab="Sample", ylab="Euclidean distance")
+  rect.hclust(chem_clust, 5, border="red") #final plot
+```
