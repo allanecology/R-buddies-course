@@ -102,7 +102,7 @@ iris[iris$Sepal.Length > 6, ]        # filter rows by statement without using wh
 
 
 # perform calculations on dataset
-aggregate(iris, Sepal.Length ~ Species, mean) # calculate the mean Sepal.Length of each Species
+stats::aggregate(iris, Sepal.Length ~ Species, mean) # calculate the mean Sepal.Length of each Species
 apply(iris[, -which(names(iris) %in% c("Species"))], 2, mean) # calculate the mean of each column except the Species column
 apply(iris[, -which(names(iris) %in% c("Species"))], 1, sum)  # calculate the sum of each row from the iris dataset without the Species column
 ```
