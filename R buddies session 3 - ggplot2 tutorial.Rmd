@@ -1,0 +1,296 @@
+---
+title: "Ggplot2 tutorial R buddy"
+author: "Hannah"
+date: "2022-11-23"
+output: html_document
+---
+
+This is a beginner tutorial that introduces you to
+
++ scatter plots
++ adding trend lines
++ adding labels
++ changing colours
++ plotting summary stats (mean, error bars)
++ combining plots
+
+You can use the data introduced below or your own data. If you use your own data, you will have to adapt the code to your data.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+options(knitr.duplicate.label = "allow")
+```
+
+```{css, echo=FALSE}
+.scroll-200 {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: inherit;
+}
+```
+
+
+```{r load packages and data, message=F,warning=F, echo=T}
+
+library(ggplot2)
+library(remotes)
+library(AED)
+library(cowplot)
+
+remotes::install_github("romunov/AED")
+```
+
+
+```{r cite package, class.output="scroll-200"}
+citation("ggplot2")
+```
+
+
+
+### About the data set
+"RIKZ" is a data set of Alain Zuur, author of the book "Mixed effects models and extensions in ecology with R" (2009). It's in the AED package, which you find on github. The data set is on macrofauna species richness (response variable) measured at 9 different beaches at different distances from the sampling station to the tidal level (NAP) and at different expositions. The main interest is whether NAP and exposition affect macrofauna species richness.
+
+
+
+```{r, class.output="scroll-200"}
+# download data from the AED package
+
+data("RIKZ")
+head(RIKZ)
+```
+
+
+
+
+### ggplot()
+This function creates a basic plot background
+
+```{r ggplot function, class.output="scroll-200", message=F,warning=F}
+ggplot(RIKZ, aes(x = NAP, y = Richness))
+```
+
+
+
+### Scatter plot
+Add a geom object to the plot to visualize data. Check out the different themes which you can add with the cowplot package (https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html).
+
+```{r scatter plot, class.output="scroll-200", message=F,warning=F}
+
+ggplot(RIKZ, aes(x = NAP, y = Richness, colour = factor(Exposure))) +
+  geom_point() +
+  theme_cowplot()
+  
+```
+
+
+### Trendlines
+We can add a trendline to the scatterplot. The method "lm" fits a linear model. "rml" is part of the "MASS" package and more robust because outliers do not affect the fit as much as in "lm". Do you see a difference between the two methods?
+```{r scatter plot with trend line, class.output="scroll-200", message=F,warning=F}
+ggplot(RIKZ, aes(x = NAP, y = Richness)) +
+  geom_point(alpha=.5) +
+  geom_smooth(method=lm)
+
+library(MASS)
+
+ggplot(RIKZ, aes(x = NAP, y = Richness)) +
+  geom_point(alpha=.5) +
+  geom_smooth(method=rlm)
+
+```
+
+Now lets see whether there are differences in the relationship between X and Y for the third variable. The next plot draws a trendline for the groups of this third variable separately. 
+
+```{r trend lines for groups, class.output="scroll-200"}
+ggplot(RIKZ, aes(x = NAP, y = Richness, colour = factor(Exposure))) +
+  geom_point(alpha=.5) + # alpha sets the strength of the points
+  geom_smooth(method=lm)
+```
+
+### Facets
+We can also make separate plots for the different groups of the third variable with facet_wrap or facet_grid. 
+
+```{r facets, class.output="scroll-200"}
+ggplot(RIKZ, aes(x = NAP, y = Richness)) +
+  geom_point(alpha=.5) +
+  geom_smooth(method=lm) +
+  facet_wrap(~Exposure,
+             scales = "free_y") +
+          # check out the different scale options "free_x", "free", "fixed"
+  theme_cowplot()
+```
+
+### Labels
+Now, add a title and a subtitle to the plot and change the axes labels. Note that there is a lot of redundancy and that in this case the labels are probably not necessary. 
+```{r add title and labels, class.output="scroll-200"}
+ggplot(RIKZ, aes(x = NAP, y = Richness, shape = factor(Exposure), colour = factor(Exposure))) +
+  geom_point(alpha=.5) +
+  geom_smooth(se = FALSE, method=lm) +
+  labs(title = "RIKZ dataset",
+       subtitle = "Species richness decreases with increasing distance of the sampling station to the tidal level (NAP)",
+       x = "NAP",
+       y = "Macrofauna species richness",
+       shape = "Exposure",
+       colour = "Exposure") +
+  theme_cowplot()
+
+```
+
+
+### Colours
+Change colours with Rcolorbrewer package:
+
+```{r change colours, class.output="scroll-200"}
+library(RColorBrewer)
+
+display.brewer.all(colorblindFriendly=TRUE)
+
+
+```
+
+```{r change colors, class.output="scroll-200"}
+plot1 <-  ggplot(RIKZ, aes(x = NAP, y = Richness, shape = factor(Exposure), colour = factor(Exposure))) +
+              geom_point(alpha=.5) +
+              geom_smooth(se = FALSE, method=lm) +
+              labs(
+              x = "NAP",
+              y = "Macrofauna species richness",
+              shape = "Exposure",
+              colour = "Exposure") +
+              theme_cowplot() +
+              scale_color_brewer(palette = "Dark2")
+
+```
+
+### Means and error bars
+Add means and error bars with the summarySE (http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)). First run the summarySE function, then create new dataframe with summarySE(data).
+
+```{r means and errorbars, class.output="scroll-200"}
+## Gives count, mean, standard deviation, standard error of the mean, and confidence interval (default 95%).
+##   data: a data frame.
+##   measurevar: the name of a column that contains the variable to be summariezed
+##   groupvars: a vector containing names of columns that contain grouping variables
+##   na.rm: a boolean that indicates whether to ignore NA's
+##   conf.interval: the percent range of the confidence interval (default is 95%)
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+    library(plyr)
+
+    # New version of length which can handle NA's: if na.rm==T, don't count them
+    length2 <- function (x, na.rm=FALSE) {
+        if (na.rm) sum(!is.na(x))
+        else       length(x)
+    }
+
+    # This does the summary. For each group's data frame, return a vector with
+    # N, mean, and sd
+    datac <- ddply(data, groupvars, .drop=.drop,
+      .fun = function(xx, col) {
+        c(N    = length2(xx[[col]], na.rm=na.rm),
+          mean = mean   (xx[[col]], na.rm=na.rm),
+          sd   = sd     (xx[[col]], na.rm=na.rm)
+        )
+      },
+      measurevar
+    )
+
+    # Rename the "mean" column    
+    datac <- rename(datac, c("mean" = measurevar))
+
+    datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+
+    # Confidence interval multiplier for standard error
+    # Calculate t-statistic for confidence interval: 
+    # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+    ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+    datac$ci <- datac$se * ciMult
+
+    return(datac)
+}
+
+RIKZ_summary <- summarySE(RIKZ, measurevar ="Richness", groupvars="Exposure")
+
+RIKZ_summary
+
+errorbars <- ggplot(data=RIKZ_summary, aes(y=Richness, x=factor(Exposure)))+
+                    geom_point()+
+                    geom_errorbar(aes(ymin = Richness - se,
+                    ymax = Richness + se,
+                    width = .2)) +
+                    labs(x = "Exposure",
+                         y = "Macrofauna species richness") +
+                     theme_cowplot()
+
+
+
+```
+
+
+### Combine plots
+Lets combine the two plots we have saved
+
+```{r combine plots, class.output="scroll-200"}
+library(ggpubr)
+
+ggarrange(plot1, errorbars, labels = c("A", "B"))
+```
+
+Think how this graph could be improved!
+
+### Bar plot and annotate text
+Now, let's do a simple bar plot and add some stats.
+
+```{r bar plot, class.output="scroll-200"}
+ggplot(RIKZ_summary, aes(y = Richness, x = factor(Exposure)), fill = factor(Exposure)) +
+          geom_bar(position="dodge", stat="identity", width=.25) + # btw, note that this "+" always has to be on the upper line
+          geom_errorbar(aes(ymin = Richness - se,
+                    ymax = Richness + se,
+                    width = .2)) +
+                    labs(x = "Exposure",
+                         y = "Macrofauna species richness") +
+  
+          annotate("text", 
+           x = c(1, 2, 3, 2), # specifies the location on x-axis
+           y = c(15, 8.5, 3.75, 14), # specifies location on y-axis
+           label = c("***", "***", "***", "R²m=0.56 \n R²c=0.74"), # \ sets text on new line
+           size=5) +
+                     theme_cowplot()
+```
+
+A more tricky thing is to annotate text to different facets if you are using facet_wrap or facet_grid. 
+
+```{r annotate text to different factes}
+
+ggplot(RIKZ, aes(x = NAP, y = Richness)) +
+  geom_point(alpha=.5) +
+  geom_smooth(method=lm) +
+  facet_wrap(~Exposure,
+             scales = "fixed") +
+  annotate("text", label = "My R buddy", size = 4, x = 1, y = 25) +
+  theme_cowplot()
+### each facet gets the same text
+
+### if you need different text for different labels, you can define an additional dataframe beforehand
+
+dat_text <- data.frame(NAP = 1,
+                       Richness = 25,
+                       Exposure =c(8, 10, 11),
+                       label=c("Let's" , "do" , "a break")
+)
+
+dat_text
+
+ggplot(RIKZ, aes(x = NAP, y = Richness)) +
+  geom_point(alpha=.5) +
+  geom_smooth(method=lm) +
+  facet_wrap(~Exposure,
+             scales = "fixed") +
+  geom_text(data = dat_text,
+            label=dat_text$label,
+            size = 10) +
+  theme_cowplot(
+)
+
+```
+
+
+Additive task: try to add an image to your plot ((https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html))
