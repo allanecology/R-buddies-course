@@ -31,13 +31,12 @@ options(knitr.duplicate.label = "allow")
 
 
 ```{r load packages and data, message=F,warning=F, echo=T}
+remotes::install_github("romunov/AED")
 
 library(ggplot2)
 library(remotes)
 library(AED)
 library(cowplot)
-
-remotes::install_github("romunov/AED")
 ```
 
 
