@@ -14,12 +14,14 @@ require(reshape2)
 library(ggplot2)
 
 # create an example dataset "plantspecies"
+landuse_gradient = sample(seq(1, 3, 0.1), 100, replace = T)
 plantspecies <- data.frame(plotID = as.factor(seq(1, 100, 1)),
                            landuse_gradient = sample(seq(1, 3, 0.1), 100, replace = T),
                            plottaria_exampulus = 0.5*landuse_gradient + 12 + rnorm(100, mean = 12/2, sd = 12/0.5),
                            graphica_demonstrandi = 0.5*landuse_gradient + 8 + rnorm(100, mean = 8/2, sd = 8/1),
                            arrclubus_cursus = 0.5*landuse_gradient + 25 + rnorm(100, mean = 25/2, sd = 25/2),
                            exemplaria_plotii = 0.5*landuse_gradient + 9 + rnorm(100, mean = 9/2, sd = 9/0.8))
+rm(landuse_gradient)
 head(plantspecies)
 
 
