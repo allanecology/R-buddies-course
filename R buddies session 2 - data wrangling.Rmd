@@ -121,6 +121,7 @@ A few examples showing how to perform a given computation with all 3 proposed wa
 ```{r}
 # with R base
 iris[, "Sepal.Length"]   # output is a vector
+iris[["Sepal.Length"]]   # output is a vector
 iris$Sepal.Length        # output is a vector
 iris[, c("Sepal.Length")]
 
