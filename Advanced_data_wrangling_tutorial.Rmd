@@ -35,6 +35,8 @@ library(vegan)
 library(ggplot2)
 library(missForest) # adding missing data
 library(naniar)
+
+set.seed(0)
 ```
 
 
@@ -45,6 +47,15 @@ data(mite)
 
 # the varespec dataset contains estimated cover of 44 plant species measured in 24 plots (rows)
 data(varespec)
+# The varechem dataset belongs to the varespec dataset. 
+# It contains 14 columns of soil characteristics, measured on 24 plots (rows)
+# Baresoil gives the estimated cover of bare soil, 
+#    Humdepth the thickness of the humus layer.
+data(varechem)
+#
+# combine data from varespec and varechem
+varecomb <- data.frame("Pinusyl" = varespec[, c("Pinusylv")], varechem)
+varecomb_NA <- prodNA(varecomb, noNA = 0.1)
 
 # introduce missing values in some of the datasets
 mite_NA <- prodNA(mite, noNA = 0.1)
@@ -171,7 +182,7 @@ If you are interested in those type of considerations, you might consider [this 
 
 
 
-# missing data  {-}
+# missing data
 
 ## getting an overview
 with package `naniar` or by hand
@@ -187,21 +198,70 @@ apply(mite_NA, 2, function(x) sum(is.na(x))) # count the missing elements in all
 heatmap(is.na(mite_NA)*1, Colv = NA, Rowv = NA)
 ```
 
-### Exercise
-- Use the missForest::prodNA() function to remove 20% of the data (i.e. to add 20% of NA) for the BCI dataset from the vegan package.
-- Count the number of missing values for columns : 
-    Solanum.hayesii Sorocea.affinis Spachea.membranacea Spondias.mombin Spondias.radlkoferi Sterculia.apetala
-- generate a heatmap of the missing values with (1) the naniar package and with (2) the base R package function heatmap().
+### Exercises "missing data"
 
-## Check if dataset is still balanced
+**Exercise 1** : Use the missForest::prodNA() function to remove 20% of the data (i.e. to add 20% of NA) from the varespec dataset which is provided by the vegan package.
+```{r}
+varespec_NA <- prodNA(varespec, noNA = 0.2)
+```
+
+
+**Exercise 2** : Count the number of missing values for the following columns in the varespec dataset : "Dicrfusc" "Dicrpoly" "Hylosple" "Pleuschr" "Polypili" "Polyjuni" "Polycomm" "Pohlnuta" "Ptilcili" "Barbhatc" "Cladarbu" "Cladrang"
+```{r}
+#TODO add solution
+# there is no solution yet - would you like to provide one?
+```
+
+
+**Exercise 3** : Please generate a heatmap of the missing values in the varespec dataset with missing values which you created in Exercise 1. Use (1) the naniar package and (2) the base R package function heatmap() to do so.
+
+**Exercise 4** : Imagine the data in the above generated varespec dataset with missing values was wrongly labelled. The values labelled as NA were in fact not missing, but zero. Please recode all missing values with 0.
+```{r}
+varespec_NA[is.na(varespec_NA)] <- 0
+```
+
+
+## Fitting models on incomplete data
 A problem of missing data is, that most models used in statistical analysis rely on complete data (i.e. no missing values). However, in ecological datasets, missing data is very common. It is sometimes not obvious for the user, that very common models (like linear models `lm()`) automatically exclude all rows from the dataset where at least one value is missing.
+```{r}
+mod1 <- lm(Pinusyl ~ N + Baresoil + Humdepth + pH, data = varecomb_NA)
+summary(mod1)
 
-- only provide the columns used for the analysis!!
-- check if your data is still balanced!!
+mod1$df.residual + length(coef(mod1))# the model was fitted on 15 degrees of freedom
+# but remember, we had 24 plots : 
+nrow(varecomb_NA)
+
+# where did the rows go?
+nrow(na.omit(varecomb_NA[, c("Pinusyl", "N", "Baresoil", "Humdepth", "pH")]))
+```
+Note that lm does not exclude all rows with missing values : `nrow(na.omit(varecomb_NA))` only leaves 5 rows.
+
+This can be a serious problem when doing model selection, or comparing models with different sets of explanatory variables. When removing a given variable, we add, at the same time, the rows which were missing in the given variable back to the model.
+```{r}
+# mod 1 from above
+mod1 <- lm(Pinusyl ~ N + Baresoil + Humdepth + pH, data = varecomb_NA)
+mod1$df.residual + length(coef(mod1))
+
+# removing a variable from the model
+mod2 <- lm(Pinusyl ~ Baresoil + Humdepth + pH, data = varecomb_NA)
+summary(mod2)
+mod2$df.residual + length(coef(mod2))
+# model 2 works with 3 more rows!
+```
+In a case like the above, model1 and model2 are no longer directly comparable.
+
+Therefore, it is better to specify the set of plots BEFORE fitting models. If there are too many missing values, the missing values can be imputed. (If you are interested in this topic, we could make a session about missing value imputation)
+
+
+
+## Incomplete data can be unbalanced data
+
 
 ```{r}
-
+#TODO add example of experimental data with 3 groups, but because data is NOT missing at random, groups get inbalanced!
 ```
+
+**Exercise 4** 
 
 
 
