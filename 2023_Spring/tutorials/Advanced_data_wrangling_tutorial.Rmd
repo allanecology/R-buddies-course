@@ -5,7 +5,7 @@ date: "2023-03-15"
 output: html_document
 ---
 
-PLEASE CORRECT IN- make nicer sentences, add more info where you need it, tell me where it's hard to understand!
+PLEASE CONTRIBUTE TO MAKE THIS TUTORIAL NICER - make nicer sentences, add more info where you need it, tell me where it's hard to understand!
 
 
 ```{r setup, include=FALSE}
@@ -35,6 +35,7 @@ library(vegan)
 library(ggplot2)
 library(missForest) # adding missing data
 library(naniar)
+library(data.table)
 
 set.seed(0)
 ```
@@ -202,22 +203,25 @@ heatmap(is.na(mite_NA)*1, Colv = NA, Rowv = NA)
 
 **Exercise 1** : Use the missForest::prodNA() function to remove 20% of the data (i.e. to add 20% of NA) from the varespec dataset which is provided by the vegan package.
 ```{r}
-varespec_NA <- prodNA(varespec, noNA = 0.2)
+
 ```
 
 
 **Exercise 2** : Count the number of missing values for the following columns in the varespec dataset : "Dicrfusc" "Dicrpoly" "Hylosple" "Pleuschr" "Polypili" "Polyjuni" "Polycomm" "Pohlnuta" "Ptilcili" "Barbhatc" "Cladarbu" "Cladrang"
 ```{r}
-#TODO add solution
-# there is no solution yet - would you like to provide one?
+
 ```
 
 
 **Exercise 3** : Please generate a heatmap of the missing values in the varespec dataset with missing values which you created in Exercise 1. Use (1) the naniar package and (2) the base R package function heatmap() to do so.
+```{r}
+
+```
+
 
 **Exercise 4** : Imagine the data in the above generated varespec dataset with missing values was wrongly labelled. The values labelled as NA were in fact not missing, but zero. Please recode all missing values with 0.
 ```{r}
-varespec_NA[is.na(varespec_NA)] <- 0
+
 ```
 
 
@@ -256,34 +260,69 @@ Therefore, it is better to specify the set of plots BEFORE fitting models. If th
 
 ## Incomplete data can be unbalanced data
 
-
 ```{r}
-#TODO add example of experimental data with 3 groups, but because data is NOT missing at random, groups get inbalanced!
+experimental_data <- data.table(plotname = paste0("plot", 1:20),
+           treatment = as.factor(c(rep("A", 10), c(rep("B", 10)))),
+           plantheight = c(rnorm(10, mean = 5, sd = 1), rnorm(10, mean = 9, sd = 1)))
+# well-designed experiment : 
+plot(experimental_data$treatment) # treatments are balanced
+
+# imagine some of the rows were lost while collecting the data.
+experimental_dataNA <- rbindlist(list(prodNA(experimental_data[treatment == "A", ], noNA = 0.1),
+                                 prodNA(experimental_data[treatment == "B", ], noNA = 0.3)))
+
+# Check what happens to experimental design when some of the rows are lost.
+plot(na.omit(experimental_dataNA)$treatment) # treatments are NOT balanced any more!
+table(na.omit(experimental_dataNA)$treatment)
 ```
 
-**Exercise 4** 
+In this example, it is easy to spot that the experimental design is unbalanced. But in larger, more complex datasets, it can be harder.
+
+**Additional exercise** : Check your own dataset: Do you have NA values? If yes, how many and where? Is the design still balanced? If you have a complete dataset, try to add missing values with `prodNA` and check. If you don't have a your dataset at hand, use one of the example datasets, e.g. by combining the datasets `varespec` and `varechem`
+```{r}
+
+```
 
 
 
 # working with strings
+It can be very handy to know about these four functions :
+`paste()`, `paste0()`, `grep()`, `sub()`
+```{r}
+# paste : pasting strings together
+# simple usage : 
+paste("A", "B") # note the default separator is " "
+paste("A", "B", sep = ", ")
+paste("A", "B", sep = "SEPARATOR")
+# paste0 has no separator by default
+paste0("A", "B")
+# usage example : file paths
+PATH_TO_DATA <- "C:/USER/Documents/RESEARCH_PROJECTS/PROJECT1/DATA/" # 
+paste0(PATH_TO_DATA, "dataset1.Rds")
+# the above can be used e.g. within a reading function like load()
 
-paste, paste0, grep, sub
+# grep : finding patterns in strings
+grep("A", c("A", "B", "C")) # returns the index of the matched element
+grep("A", c("A", "B", "C"), value = T) # returns the value of the matched element
+# usage example : filtering columns of a dataset
+grep("Clad", names(varespec)) # find all "Clad" species
+grep("Clad", names(varespec), value = T)
+varespec[, grep("Clad", names(varespec))] # filtering all columns which contain "Clad" in species names
 
 
+# sub : substitute parts of words
+sub(" ", "_", "hello world") # substitute the space " " character with an underline "_"
+sub(" ", "_", "plantago_lanceolata")
+# you can apply sub on a vector
+sub(" ", "_", c("plantago lanceolata", "taraxacum officinale", "vicia sepia"))
+# that means, you can also apply it to a column, or to the  names of a dataset.
+```
 
-# Data wrangling pitfalls and how to avoid them
+## Outlook : regular expressions
+- [Good tutorial](https://stringr.tidyverse.org/) about using the `stringr` package.
+- Tutorial on regular expressions at : [Biodiversity Exploratories Synthesis Tutorials](https://github.com/biodiversity-exploratories-synthesis/Synthesis_courses_workshops/blob/main/Help_desk_Spring_2021/2021_synthesis_Rhelpdesk_regex_and_text_processing.R)
 
-- not relying on specialised packages --> expert solutions out there, search them
-- cbind/rbind
-- duplicated rows --> can't aggregate
-- excluding rows with NAs
-- distinguish NAs from 0s
-- checking by hand vs. checking by plotting --> either see only a few data points or whole column
-- NEVER update a table by several scripts -> you will lose the info when you did the last change!
-    - rename output after each step (e.g. "step1", "step2", ...)
-- NEVER do changes by hand in excel, or if yes, report them VERY detailed in script
 
-- not specifying which package is used data.table::melt() or reshape2::melt()
 
 
 
@@ -291,5 +330,23 @@ paste, paste0, grep, sub
 
 See nice reshape2 tutorial at : https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html
 
-adding the situation where a row is duplicated and default function length is used!!! common mistake.
+**Exercise "from long to wide and back"** : Use the example datasets varechem and varespec. Change the format such that all plant species are collapsed to one column called "plantspecies". The cover data is found in a column called "plantcover", and the chemical compounds remain in their columns. What are the advantages and disadvantages of a this data format? Is it more useful, or less useful than before?
+```{r}
 
+```
+
+
+# Data wrangling pitfalls and how to avoid them
+
+- not relying on specialised packages --> expert solutions out there, search them
+- cbind/rbind without matching column/row names
+- duplicated rows (e.g. can't aggregate)
+- excluding rows with NAs
+- distinguish NAs from 0s
+- checking by hand vs. checking by plotting --> either see only a few data points or whole column
+- NEVER update a table by several scripts -> you will lose the info when you did the last change!
+    - rename output after each step (e.g. "step1", "step2", ...)
+- NEVER do changes by hand in excel, or if yes, report them VERY detailed in script
+- not specifying which package is used data.table::melt() or reshape2::melt()
+
+Please share your own experiences - what do you perceive as "dangerous" functions, or which errors have you experienced?

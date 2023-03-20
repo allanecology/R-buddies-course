@@ -70,3 +70,33 @@ apply(varespec[, which(names(varespec) %in% varespec_columns_to_log_transform)],
 ```
 
 
+
+
+
+### Exercises "missing data"
+
+**Exercise 1** : Use the missForest::prodNA() function to remove 20% of the data (i.e. to add 20% of NA) from the varespec dataset which is provided by the vegan package.
+```{r}
+varespec_NA <- prodNA(varespec, noNA = 0.2)
+```
+
+
+**Exercise 2** : Count the number of missing values for the following columns in the varespec dataset : "Dicrfusc" "Dicrpoly" "Hylosple" "Pleuschr" "Polypili" "Polyjuni" "Polycomm" "Pohlnuta" "Ptilcili" "Barbhatc" "Cladarbu" "Cladrang"
+```{r}
+#TODO add solution
+# there is no solution yet - would you like to provide one?
+```
+
+
+**Exercise 3** : Please generate a heatmap of the missing values in the varespec dataset with missing values which you created in Exercise 1. Use (1) the naniar package and (2) the base R package function heatmap() to do so.
+```{r}
+#TODO add solution
+# there is no solution yet - would you like to provide one?
+```
+
+
+**Exercise 4** : Imagine the data in the above generated varespec dataset with missing values was wrongly labelled. The values labelled as NA were in fact not missing, but zero. Please recode all missing values with 0.
+```{r}
+varespec_NA[is.na(varespec_NA)] <- 0
+```
+
