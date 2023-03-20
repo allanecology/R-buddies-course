@@ -1,0 +1,244 @@
+---
+title: "Good Programming Practices Exercises"
+author: "N. Schenk"
+date: "2022-11-09"
+output: html_document
+---
+# Good Programming Practices
+
+477757-HS2022-0-R Coding Club, Application for Ecology. Examples and exercises adapted from [Synthesis helpdesk Good Programming Practices](https://github.com/biodiversity-exploratories-synthesis/Synthesis_courses_workshops/tree/main/Help_desk_Fall_2021). Written by Noelle Schenk, 09.11.22.
+
+This file contains examples of practices to imporove the readability of our code. Feel free to use this file to play around with the different examples yourself.
+
+
+## Dependencies
+```{r, eval = F}
+library(data.table)
+library(reshape2)
+library(tidyr)
+library(styler)
+library(renv)
+
+path_to_data <- "example_data_synthesis_helpdesk/"
+path_to_output <- "R_outputs_and_plots/"
+
+set.seed(12) # always generate the same random numbers, every time you run this script
+```
+
+With the `renv` package, the environment can be saved and re-loaded. This means, all your packages and their versions are stored and can automatically be reloaded by the next user. Would you like to practice this? See [this tutorial](https://rstudio.github.io/renv/articles/renv.html).
+
+More about [reproducible workflows in RStudio](https://www.geo.uzh.ch/microsite/reproducible_research/post/rr-r-publication/).
+
+*Additional* : Running the code below, you can learn about the option to "answer" to an input from RStudio. Just try out the code below, following the instructions.
+
+```{r}
+# To just see what will be written in your lockfile, run the following:
+# and write "n" to the console when it asks you if you would like to activate this project vefore snapshot() is called.
+# (for your own project, you will ofcorse activate the project.)
+# When asking if you would like to proceed : "N"
+renv::snapshot()
+```
+
+
+## Good Coding practices
+
+### Keep it simple!
+
+Use the lines and indenting.
+```{r, eval = F}
+# bad example : all in one line
+info_data <- data.table::fread(paste(path_to_data, "/info_data.csv", sep = ""), header=T)
+#
+# good example : use many lines
+info_data <- data.table::fread(
+  paste(path_to_data, 
+        "/info_data.csv", 
+        sep = ""), 
+  header=T)
+```
+
+Add structure to your file
+```{r, eval = F}
+# add structure to your file ####
+# if you add four "#" or "-" in the end of the title, RStudio will allow
+#   you to fold in and out the section
+# second example ----
+
+# you can even generate nice titles which are easy to find when scrolling around :
+
+# # # # # # # # # # #
+#                   #
+#      TITLE        # ----
+#                   #
+# # # # # # # # # # #
+
+# # # # # # # #
+# 1 - PART 1  # ----
+# # # # # # # #
+
+# # # # # # # #
+# 1.a - PART 1.a  # ----
+# # # # # # # #
+
+# # # # # # # #
+# 2 - PART 2  # ----
+# # # # # # # #
+
+# ...
+```
+
+
+### Use a code style
+
+Examples taken from the [tidyverse code style](http://adv-r.had.co.nz/Style.html and https://style.tidyverse.org/syntax.html#long-lines)
+```{r, eval = F}
+# Good
+average <- mean(feet / 12 + inches, na.rm = TRUE)
+# Bad
+average<-mean(feet/12+inches,na.rm=TRUE)
+
+# Good
+do_something_very_complicated(
+  something = "that",
+  requires = many,
+  arguments = "some of which may be long"
+)
+# Bad
+do_something_very_complicated("that", requires, many, arguments,
+                              "some of which may be long"
+)
+
+# Example use of styler with RStudio
+# 1. copy bad example from above
+# 2. Select the piece of code you wish to style
+# 3. Go to RStudio Menu bar above > Addins > search for "styler" > click "Style selection"
+average<-mean(feet/12+inches,na.rm=TRUE)
+OneFile <- c(1,2,3) # styler does not correct variable names in CamelCase
+```
+
+
+## Comment your code
+
+Better too much commenting than too little.
+```{r, eval = F}
+# Bad example : comment the obvious
+# read table example.csv
+info_data <- data.table::fread("example.csv", header = T)
+
+# Good example : comment the unexpected
+# use package data.table to read in very large table "example.csv"
+info_data <- data.table::fread("example.csv", header = T)
+```
+
+
+### Make a script header
+
+A header contains (at least) :
+- purpose of the script
+- date and creator name
+- requirements/ dependencies
+
+Either in Markdown (see the script header of this file) or in an R script :
+
+```{r, eval = F}
+# # # # # # # # # # # # # # # # # ##
+#                                  #
+# GOOD PROGRAMMING PRACTICES       #
+#                                  #
+# # # # # # # # # # # # # # # # # ##
+# Biodiversity Exploratories Synthesis R helpdesk
+# Noëlle Schenk 05.02.2021
+#
+# this file contains examples of practices to improve the
+# readability of your code.
+#
+# Dependencies : 
+library(data.table)
+library(reshape2)
+library(tidyr)
+library(styler)
+
+path_to_data <- "example_data_synthesis_helpdesk/"
+path_to_output <- "R_outputs_and_plots/"
+
+set.seed(12) # always generate the same random numbers, every time you run this script
+```
+
+
+
+### give meaningful names
+
+Good names reduce comments
+```{r, eval = F}
+time_tolerance <- 60 # seconds
+time_tolerance_in_seconds <- 60
+```
+
+
+### be consistent
+
+```{r, eval = F}
+# always name your test datasets with the same name, e.g. test, deleteme or df
+test <- data.frame("A" = rnorm(10, 0, 1), "B" = rnorm(10, 0, 1))
+deleteme <- data.frame("A" = rnorm(10, 0, 1), "B" = rnorm(10, 0, 1))
+df <- data.frame("A" = rnorm(10, 0, 1), "B" = rnorm(10, 0, 1))
+```
+
+
+### relative over absolute file paths
+
+Relative paths work on all computers, absolute paths only work on your computer.
+```{r, eval = F}
+absolute_path <- "C:/user/yourname/Documents/Project1/Rscripts/data/info_data.csv"
+relative_path <- "/data/info_data.csv"
+
+# TRICK (Additional)
+# Abbreviations in paths:
+# "."  : refers to the folder where you are at the moment = the working directory
+# the below paths point to the same directory
+path_to_data <- "./example_data_synthesis_helpdesk/"
+path_to_data <- "example_data_synthesis_helpdesk/"
+# ".." : refers to the parent directory (1 level up) from where you are now (=from the working directory)
+#   given your path structure looks like this : 
+#   C:/user/yourname/Documents/PhD/Project1/Analysis/Rscripts/data/info_data.csv
+#   and your working directory is "Rscripts"
+#   both of the following path points to the folder "Analysis"
+path_to_data <- "../"
+path_to_data <- "C:/user/yourname/Documents/PhD/Project1/Analysis/"
+```
+
+
+### Test your code
+
+Testing prevents the majority of errors.
+```{r, eval = F}
+# create example data.frame
+example <- data.frame(species = c("Erithacus rubecula", "Arion vulgaris", 
+                                  "Plantago Lanceolata"),
+                      abundance = c(2, NA, 10))
+# action : recode NA value to 0
+#    because Arion vulgaris was measured, but no individuals were found
+example[which(example$species == "Arion vulgaris"), 2] <- 0
+#
+# test : did I do what I wanted?
+sum(is.na(example$abundance)) # no NA values any more
+sum(is.na(example$species))
+min(example$abundance)        # min is 0 now, as expected
+max(example$abundance)
+View(example)
+barplot(height = example$abundance, names.arg = example$species)
+example$abundance
+
+# test and throw an error
+if(nrow(na.omit(example)) != nrow(example)){
+  stop("The function requires complete data, but the dataset contains NA values.")
+}
+```
+
+
+## Discussion
+
+- Which of the practices will you apply (first)?
+- How many of the practices did you already know, how many were new?
+- Which practices, you think, will help you the most in the future?
+- Which practices seem less useful to you?
