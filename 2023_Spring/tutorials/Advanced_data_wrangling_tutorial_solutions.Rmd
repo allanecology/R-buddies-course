@@ -109,6 +109,11 @@ varespec_NA <- prodNA(varespec, noNA = 0.2)
 ```{r}
 #TODO add solution
 # there is no solution yet - would you like to provide one?
+# selecting the columns specified above
+varespec[, c("Dicrfusc", "Dicrpoly", "Hylosple", "Pleuschr", "Polypili", "Polyjuni", "Polycomm", "Pohlnuta", "Ptilcili", "Barbhatc", "Cladarbu", "Cladrang")]
+# running the apply function on the subset :
+apply(varespec[, c("Dicrfusc", "Dicrpoly", "Hylosple", "Pleuschr", "Polypili", "Polyjuni", "Polycomm", "Pohlnuta", "Ptilcili", "Barbhatc", "Cladarbu", "Cladrang")], 
+      2, FUN = function(x) sum(is.na(x)))
 ```
 
 
@@ -116,6 +121,8 @@ varespec_NA <- prodNA(varespec, noNA = 0.2)
 ```{r}
 #TODO add solution
 # there is no solution yet - would you like to provide one?
+
+
 ```
 
 

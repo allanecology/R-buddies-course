@@ -204,6 +204,13 @@ with package `naniar` or by hand
 ```{r}
 # with package naniar
 vis_miss(mite_NA)
+# note : if you can't read the outer right labels, you can use : 
+vis_miss(mite_NA) + theme(plot.margin = 
+                            margin(t = 1,  # Top margin
+                            r = 2,    # Right margin
+                            b = 1,  # Bottom margin
+                            l = 1,  # Left margin
+                            unit = "cm"))
 
 # by hand
 is.na(mite_NA$Brachy) # show which elements are missing
