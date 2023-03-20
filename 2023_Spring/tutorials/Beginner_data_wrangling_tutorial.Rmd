@@ -1,0 +1,196 @@
+---
+title: "Beginner -  Data wrangling in R"
+author: "N. Schenk, C.Daniel"
+date: "2022-11-09"
+output: html_document
+---
+
+# Data wrangling in R
+
+Aim of this document : give a start point to dive into data wrangling packages in R and start a discussion about it.
+
+3 main ways to do data wrangling : 
+- R base (without using a package)
+- tidyverse (very user-friendly)
+- data.table (for very large datasets)
+
+Unfortunately the syntax of the 3 ways differs, and learning one way does not automatically mean learning all 3 ways. The good news is that you don't have to know all 3, but select the one that appeals most to you.
+
+Below under `Examples` you find a few examples of classcal data wrangling problems solved with all 3 ways, for you to get an overview of all three.
+
+## R base
+Some people prefer to use base R, because it's the nearet to the programming language, and thus the quickest way, and no need to install a package before doing something. Or they prefer to learn base R before diving into the different packages in order to understand better what the functions do.
+
+Two suggestions of tutorials to learn how to wrangel `data.frames`, the most used R object containing research data:
+- [An Introduction to R by Douglas, Roos, Mancini, Couto and Lusseau](https://intro2r.com/wrangling-data-frames.html) Chapter 3.4
+- In my opinion the classic of all classics : [The R book by M. Crawley](http://www.ievbras.ru/ecostat/Kiril/R/Biblio_N/R_Eng/Crawley2013.pdf)
+
+Other possibilities are : ["R for Fledglings" by Donovan, Brown and Katz](https://www.uvm.edu/~tdonovan/RforFledglings/) starting at Chapter 6.4. and [R Guide for NSC Statistics by Deanna Li](https://bookdown.org/dli/rguide/working-with-dataset.html) Chapter 7.
+
+
+
+
+## tidyverse
+```{r}
+# install.packages("tidyverse")
+library(tidyverse)
+# The tidyverse package loads a lot of packages.
+#    mostly used for data.wrangling are : dplyr and tidyr
+```
+
+There are a lot of very good tutorials about this online. I recommend the book ["R for Data Science" by Hadley Wickham](https://r4ds.had.co.nz/wrangle-intro.html), where he introduces the why and how of data wrangling in Chapter 9-16.
+
+There is a very useful [site from tydiverse](https://www.tidyverse.org/learn/) with recommendations for 2 online courses and the book mentioned above.
+
+
+## data.table
+```{r}
+# install.packages("data.table")
+library(data.table)
+```
+Data.table is another widely used data wrangling package, which is specialised on large datasets - it is programmed in a way that makes handling very large datasets quite fast.
+
+A very good starting point is this [vignette](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html).
+
+
+# useful functions in R base
+```{r}
+# basic functions helpufl for dataset wrangling
+vec <- c(1, 2, 3, 4, 5) # create example vector
+vec > 3                 # show for each element of the vector if the statement is true or false
+sum(vec > 3)            # R interprets T as 1 and F as 0. We can therefore use sum() to count the number of times T occurs.
+                        #    in other words, count the number of times the statement is true for our vector
+which(vec > 3)          # show the indices of the vector for which the statemetn is true
+                        #    in other words, the 4th and 5th element of the vector are larger than 3
+
+```
+
+**Exercise 1:** Try to do the same with a character string instead of a numeric string
+<br>
+
+```{r}
+
+# load example dataset
+data(iris)
+
+
+# look at the dataset
+iris        # print dataset to console
+View(iris)  # show dataset in a pretty way in RStudio
+head(iris)  # print first 6 rows to console
+tail(iris)  # print last 6 rows to console
+names(iris) # print column names
+nrow(iris)  # print number or rows
+ncol(iris)  # print number of columns
+
+
+# dataset summaries
+str(iris)   # print a summary of column names, classes and values to the console
+summary(iris)        # prints a summary of each column of the dataset, with mean, 1-3 quantile, min and max
+unique(iris$Species) # print unique values of the column "Species" to the console, if the column e.g. contains categories
+duplicated(iris$Species) # prints T or F for each value, if it is a duplicate = if it has occurred before
+table(iris$Species)  # print all categories and counts of how many times a given value appears
+which(iris$Sepal.Length > 6) # print the indices of all rows for which the statement is true
+length(which(iris$Sepal.Length > 6)) # print the number of rows for which the statement is true
+
+
+# access certain elements of a data.frame
+# select columns
+iris$Sepal.Length      # select a given column by name
+iris[, "Sepal.Length"] # select a given column by name
+iris[, 1]              # select a given column by index (the first (1) column). Note : is error prone, if you change the order
+                       #    of columns in the dataset, the index will change
+# select rows
+iris[1, ]              # select a given row by index
+iris[which(iris$Sepal.Length == 6.9), ] # select a given row by value
+iris[which(iris$Sepal.Length > 6), ] # filter rows by statement using which
+iris[iris$Sepal.Length > 6, ]        # filter rows by statement without using which
+
+
+# perform calculations on dataset
+stats::aggregate(iris, Sepal.Length ~ Species, mean) # calculate the mean Sepal.Length of each Species
+apply(iris[, -which(names(iris) %in% c("Species"))], 2, mean) # calculate the mean of each column except the Species column
+apply(iris[, -which(names(iris) %in% c("Species"))], 1, sum)  # calculate the sum of each row from the iris dataset without the Species column
+```
+
+Other useful functions to be potentially added : 
+<br>
+
+- from `reshape2` package : `melt()` and `dcast()` to get from long to wide dataset format 
+
+<br>
+
+- from `R base` : `rbind()` and `cbind()` to combine two datasets (without using a common column), or `merge()` to combine two datasets by a common column 
+
+<br>
+
+(For more info, see advanced data wrangling tutorial)
+
+
+# Examples
+A few examples showing how to perform a given computation with all 3 proposed ways: with R base, with tidyverse and with data.table.
+
+## Filtering a single column by name
+```{r}
+# with R base
+iris[, "Sepal.Length"]   # output is a vector
+iris$Sepal.Length        # output is a vector
+iris[, c("Sepal.Length")]
+
+# with tidyverse
+tbl_iris <- tibble::as_tibble(iris)   # convert to specialised tidyverse format
+dplyr::select(tbl_iris, Sepal.Length) # output is a data.frame (or tibble, the format used in tidyverse)
+# note : actually the specialised data format is not absolutely needed, the commands also work on data.frames :
+dplyr::select(iris, Sepal.Length) 
+
+# with data.table
+dt_iris <- data.table::data.table(iris) # need to convert example dataset to data.table format
+dt_iris[, Sepal.Length]    # output is a vector
+dt_iris[, .(Sepal.Length)] # output is a data.table
+# note : the specialised data format is absolutely needed, the commands do not work on data.frames :
+# iris[, Sepal.Length] # raises an error
+```
+Conclusion : all 3 ways work very well and use only short commands.
+
+
+## Removing a column by name
+```{r}
+# filter out (remove) a column by name
+iris[, -which(names(iris) %in% c("Species"))]
+iris[, names(iris) != "Species"]
+
+# with tidyverse
+dplyr::select(tbl_iris, !Sepal.Length)
+
+# with data.table
+dt_iris[, -"Sepal.Length"]
+```
+Conclusion : The R base command is already longer than the commands from the specialised packages.
+
+
+## Filtering rows
+Show all rows of a data.frame that contain the category "setosa" in the column "Species".
+```{r}
+# with R base
+iris[which(iris$Species == "setosa"), ]
+
+# with tidyverse
+dplyr::filter(iris, Species == "setosa")
+
+# with data.table
+dt_iris[Species == "setosa", ]
+```
+
+**Exercise 2:** Try to remove two species using conditional operators
+
+<br>
+
+# Discussion
+- Where and how do the packages differ? List aspects that you noted so far.
+- Which one is most appealing to you and why?
+- Try to group the differing aspects : Which ones make the package suitable for Ecology and which are rather a disadvantage?
+
+
+# Bonus Rmarkdown exercises 
+- Apply changes to this script in a way that the knitted html document does not contain all the very long ouputs of the iris dataset.
+- Change a numeric variable of the "iris" dataset into a factor, then into a character string without changing the values themselves.
