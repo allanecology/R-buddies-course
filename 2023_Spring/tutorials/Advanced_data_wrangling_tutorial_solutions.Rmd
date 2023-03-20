@@ -1,0 +1,72 @@
+---
+title: "Advanced Data Wrangling - Solutions"
+author: "N. Schenk"
+date: "2023-03-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This Script contains the solutions to the tutorial about advanced data wrangling.
+
+
+
+
+### Exercises "apply"
+
+**Exercise 1** : Calculate the median number of mites in each plot in the dataset mite.
+```{r}
+# the mite dataset contains counds of orobatid mites of 70 soil cores (in rows) of 70 mite species.
+# solution with rowMeans()
+rowMeans(mite)
+# solution with apply()
+apply(mite, 1, mean)
+```
+
+**Exercise 2** : The varespec dataset contains plant cover data of 24 plots of 44 variables. Calculate the mean and the standard deviation of the plant cover for each plant species. Additional : store the results in a new data.frame. Additional 2 : plot the results.
+```{r}
+apply(varespec, 2, mean)
+apply(varespec, 2, sd)
+
+# adding output to a data.frame
+specieswise_varespec <- data.frame(names = names(varespec),
+           specieswise_mean = apply(varespec, 2, mean),
+           specieswise_sd = apply(varespec, 2, sd))
+# note the rownames are a bit irritating, they can be removed
+rownames(specieswise_varespec) <- NULL
+
+# plotting
+ggplot(specieswise_varespec, aes(x = names, y = specieswise_means)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = specieswise_means - specieswise_sd, 
+                    ymax = specieswise_means + specieswise_sd)) +
+  coord_flip()
+#TODO : this plot still misses a nice title and nicer axis labels, and maybe some extras like colors? Would you feel to add this and send to us, so the tutorial gets nicer?
+```
+
+
+**Exercise 3** : The varespec dataset contains plant cover data of 24 plots of 44 variables. Calculate the estimated cover of each plot, using the apply function.
+
+Additional : Why is the cover not always 100%?
+```{r}
+apply(varespec, 1, sum)
+```
+
+
+**Exercise 4** : During data analysis of the varespec data, it turned out that the cover data of some of the plant species need to be log transformed. Please log-transform the following columns : Cladunci Cladcocc Cladcorn Cladgrac Cladfimb Cladcris Cladchlo Cladbotr. 
+
+*Hint* : During execution, you will run into a problem. Please try to solve as you would do in a real analysis.
+```{r}
+varespec_columns_to_log_transform <- c("Cladunc", "Cladcocc", "Cladcorn", "Cladgrac", "Cladfimb", "Cladcris", "Cladchlo", "Cladbotr")
+
+apply(varespec[, which(names(varespec) %in% varespec_columns_to_log_transform)],
+      2, log)
+# please note that the log of 0 is not defined. Therefore, we need to take log(x + 1)
+
+apply(varespec[, which(names(varespec) %in% varespec_columns_to_log_transform)],
+      2, function(x) log(x + 1))
+```
+
+

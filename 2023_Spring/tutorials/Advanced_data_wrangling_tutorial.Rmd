@@ -1,0 +1,295 @@
+---
+title: "Advanced Data Wrangling"
+author: "N. Schenk"
+date: "2023-03-15"
+output: html_document
+---
+
+PLEASE CORRECT IN- make nicer sentences, add more info where you need it, tell me where it's hard to understand!
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+The world of data wrangling is large, and once you learned how to access certain rows or columns, and how to filter those parts of your data table you need, the fun just starts.
+
+Topics/ functions : 
+
+- assessing the missing data of a table
+- summarising parts of the table (aggregate, apply)
+    - R functions : `apply`, `aggregate`
+- working with strings : sub, grep, paste
+- data wrangling pitfalls and how to avoid them
+    - functions : cbind, rbind, merge
+- from wide to long and back (reshape2 melt and dcast)
+- imputation of missing data
+
+## Requirements  {-}
+
+
+**Packages**
+```{r, echo = T, message=FALSE}
+library(vegan)
+library(ggplot2)
+library(missForest) # adding missing data
+library(naniar)
+
+set.seed(0)
+```
+
+
+**Datasets**
+```{r}
+# the mite dataset contains counds of orobatid mites of 70 soil cores (in rows) of 70 mite species.
+data(mite)
+
+# the varespec dataset contains estimated cover of 44 plant species measured in 24 plots (rows)
+data(varespec)
+# The varechem dataset belongs to the varespec dataset. 
+# It contains 14 columns of soil characteristics, measured on 24 plots (rows)
+# Baresoil gives the estimated cover of bare soil, 
+#    Humdepth the thickness of the humus layer.
+data(varechem)
+#
+# combine data from varespec and varechem
+varecomb <- data.frame("Pinusyl" = varespec[, c("Pinusylv")], varechem)
+varecomb_NA <- prodNA(varecomb, noNA = 0.1)
+
+# introduce missing values in some of the datasets
+mite_NA <- prodNA(mite, noNA = 0.1)
+mite_NA_small <- prodNA(mite, noNA = 0.001) # remove a small fraction of values
+```
+
+
+**Functions**
+```{r}
+
+```
+
+
+
+
+
+# summarising parts of the table  {-}
+
+## apply
+```{r}
+help(apply)
+```
+`apply()` is a very versatile function, used to apply (execute) a given R function on each column OR on each row of a data.frame. It is useful in situation where you would like to execute the same function repeatedly on each of the columns, and it would be very tedious to write it by hand :
+```{r}
+# Example
+# Aim : calculate the mean of each column of the dataset mite
+mean(mite$Brachy)
+mean(mite$PHTH)
+mean(mite$HPAV)
+# ... and so forth, repeating for each of the 35 columns of the mite dataset
+```
+
+Maybe you know the functions `rowMeans()` and `colMeans()` which calculate the mean of every row or every column, respectively. 
+```{r}
+colMeans(mite[, 1:3])
+```
+
+Apply is a general form of these two functions. It can be used to calculate the mean of each column, as `colMeans()` does, but it can also be used to e.g. calculate the standard deviation of each column.
+
+The most important parameters are : `apply(X, MARGIN, FUN)`
+
+- X is a dataset, either a matrix, array, data.frame or a specialised form of a data.frame as e.g. a tibble or data.table
+- MARGIN is a vector, which gives the "subscripts" where to apply the function:
+    - 1 stands for rows : `apply(X = mite, MARGIN = 1, sum)` calculates the sum of each row in the dataset mite
+    - 2 stands for columns. : `apply(X = mite, MARGIN = 2, sum)` calculates the sum of each column
+    - **EXERCISE** : execute the two example above : (1) calculate the sum of each row in the dataset "mite". And (2) calculate the sum of each column in the dataset "mite".
+- FUN : specifies the function which is applied (executed). This can be e.g. `sum` to calculate the sum of each row/column, or `mean` to calculate the mean.
+    - *Speciality* : the function is written without opening and closing brackets `()` : instead of `sum()` it is enough to write `sum`.
+    - *Advanced* : the FUN argument can also be a longer function with arguments, as e.g. `apply(X = mite_NA_small, MARGIN = 2, FUN = mean, na.rm = T)`. Here, we aim to calculate the mean by avoiding NA values (because the mean function does not allow NA values `mean(c(1, 2, NA))` returns NA). The form of the function for a single vector would be `mean(mite_NA_small$Brachy, na.rm = T)`. Within the apply function, we can add the `na.rm = T` argument just after the `MARGIN` argument.
+    - *Advanced* : it is further possible to apply nested function as e.g. `apply(mite_NA_small, MARGIN = 2, FUN = function(x) sum(is.na(x)))`, where we aim to calculate the number of missing values in each column.
+
+
+
+### Exercises "apply"
+
+**Exercise 1** : Calculate the median number of mites in each plot in the dataset mite.
+```{r}
+# the mite dataset contains counds of orobatid mites of 70 soil cores (in rows) of 70 mite species.
+# solution with rowMeans()
+rowMeans(mite)
+# solution with apply()
+apply(mite, 1, mean)
+```
+
+**Exercise 2** : The varespec dataset contains plant cover data of 24 plots of 44 variables. Calculate the mean and the standard deviation of the plant cover for each plant species. Additional : store the results in a new data.frame. Additional 2 : plot the results.
+```{r}
+apply(varespec, 2, mean)
+apply(varespec, 2, sd)
+
+# adding output to a data.frame
+specieswise_varespec <- data.frame(names = names(varespec),
+           specieswise_mean = apply(varespec, 2, mean),
+           specieswise_sd = apply(varespec, 2, sd))
+# note the rownames are a bit irritating, they can be removed
+rownames(specieswise_varespec) <- NULL
+
+# plotting
+ggplot(specieswise_varespec, aes(x = names, y = specieswise_means)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = specieswise_means - specieswise_sd, 
+                    ymax = specieswise_means + specieswise_sd)) +
+  coord_flip()
+#TODO : this plot still misses a nice title and nicer axis labels, and maybe some extras like colors? Would you feel to add this and send to us, so the tutorial gets nicer?
+```
+
+
+**Exercise 3** : The varespec dataset contains plant cover data of 24 plots of 44 variables. Calculate the estimated cover of each plot, using the apply function.
+
+Additional : Why is the cover not always 100%?
+```{r}
+apply(varespec, 1, sum)
+```
+
+
+**Exercise 4** : During data analysis of the varespec data, it turned out that the cover data of some of the plant species need to be log transformed. Please log-transform the following columns : Cladunci Cladcocc Cladcorn Cladgrac Cladfimb Cladcris Cladchlo Cladbotr. 
+
+*Hint* : During execution, you will run into a problem. Please try to solve as you would do in a real analysis.
+```{r}
+varespec_columns_to_log_transform <- c("Cladunc", "Cladcocc", "Cladcorn", "Cladgrac", "Cladfimb", "Cladcris", "Cladchlo", "Cladbotr")
+
+apply(varespec[, which(names(varespec) %in% varespec_columns_to_log_transform)],
+      2, log)
+# please note that the log of 0 is not defined. Therefore, we need to take log(x + 1)
+
+apply(varespec[, which(names(varespec) %in% varespec_columns_to_log_transform)],
+      2, function(x) log(x + 1))
+```
+
+
+
+### Additional and Outlook
+Note about loops: 
+```{r}
+# It could also be tempting to write a loop in a situation where the apply function :
+for(i in 1:ncol(mite)){
+  return(mean(mite[, i]))
+}
+# which can return the same as the apply function.
+```
+apply internally calls a loop in the R language, so in this situation there is no (or only a marginal) time gain when writing the loop yourself. Note that the functions `rowMeans()` and `colMeans()` run loops in C rather than R code, and are therefore faster than an ordinary loop and faster than the apply function.
+If you are interested in those type of considerations, you might consider [this post](http://rstudio-pubs-static.s3.amazonaws.com/5526_83e42f97a07141e88b75f642dbae8b1b.html).
+
+
+
+
+
+# missing data
+
+## getting an overview
+with package `naniar` or by hand
+```{r}
+# with package naniar
+vis_miss(mite_NA)
+
+# by hand
+is.na(mite_NA$Brachy) # show which elements are missing
+sum(is.na(mite_NA$Brachy)) # count the missing elements in 1 column
+apply(mite_NA, 2, function(x) sum(is.na(x))) # count the missing elements in all columns
+# basic visualisation similar to naniar package
+heatmap(is.na(mite_NA)*1, Colv = NA, Rowv = NA)
+```
+
+### Exercises "missing data"
+
+**Exercise 1** : Use the missForest::prodNA() function to remove 20% of the data (i.e. to add 20% of NA) from the varespec dataset which is provided by the vegan package.
+```{r}
+varespec_NA <- prodNA(varespec, noNA = 0.2)
+```
+
+
+**Exercise 2** : Count the number of missing values for the following columns in the varespec dataset : "Dicrfusc" "Dicrpoly" "Hylosple" "Pleuschr" "Polypili" "Polyjuni" "Polycomm" "Pohlnuta" "Ptilcili" "Barbhatc" "Cladarbu" "Cladrang"
+```{r}
+#TODO add solution
+# there is no solution yet - would you like to provide one?
+```
+
+
+**Exercise 3** : Please generate a heatmap of the missing values in the varespec dataset with missing values which you created in Exercise 1. Use (1) the naniar package and (2) the base R package function heatmap() to do so.
+
+**Exercise 4** : Imagine the data in the above generated varespec dataset with missing values was wrongly labelled. The values labelled as NA were in fact not missing, but zero. Please recode all missing values with 0.
+```{r}
+varespec_NA[is.na(varespec_NA)] <- 0
+```
+
+
+## Fitting models on incomplete data
+A problem of missing data is, that most models used in statistical analysis rely on complete data (i.e. no missing values). However, in ecological datasets, missing data is very common. It is sometimes not obvious for the user, that very common models (like linear models `lm()`) automatically exclude all rows from the dataset where at least one value is missing.
+```{r}
+mod1 <- lm(Pinusyl ~ N + Baresoil + Humdepth + pH, data = varecomb_NA)
+summary(mod1)
+
+mod1$df.residual + length(coef(mod1))# the model was fitted on 15 degrees of freedom
+# but remember, we had 24 plots : 
+nrow(varecomb_NA)
+
+# where did the rows go?
+nrow(na.omit(varecomb_NA[, c("Pinusyl", "N", "Baresoil", "Humdepth", "pH")]))
+```
+Note that lm does not exclude all rows with missing values : `nrow(na.omit(varecomb_NA))` only leaves 5 rows.
+
+This can be a serious problem when doing model selection, or comparing models with different sets of explanatory variables. When removing a given variable, we add, at the same time, the rows which were missing in the given variable back to the model.
+```{r}
+# mod 1 from above
+mod1 <- lm(Pinusyl ~ N + Baresoil + Humdepth + pH, data = varecomb_NA)
+mod1$df.residual + length(coef(mod1))
+
+# removing a variable from the model
+mod2 <- lm(Pinusyl ~ Baresoil + Humdepth + pH, data = varecomb_NA)
+summary(mod2)
+mod2$df.residual + length(coef(mod2))
+# model 2 works with 3 more rows!
+```
+In a case like the above, model1 and model2 are no longer directly comparable.
+
+Therefore, it is better to specify the set of plots BEFORE fitting models. If there are too many missing values, the missing values can be imputed. (If you are interested in this topic, we could make a session about missing value imputation)
+
+
+
+## Incomplete data can be unbalanced data
+
+
+```{r}
+#TODO add example of experimental data with 3 groups, but because data is NOT missing at random, groups get inbalanced!
+```
+
+**Exercise 4** 
+
+
+
+# working with strings
+
+paste, paste0, grep, sub
+
+
+
+# Data wrangling pitfalls and how to avoid them
+
+- not relying on specialised packages --> expert solutions out there, search them
+- cbind/rbind
+- duplicated rows --> can't aggregate
+- excluding rows with NAs
+- distinguish NAs from 0s
+- checking by hand vs. checking by plotting --> either see only a few data points or whole column
+- NEVER update a table by several scripts -> you will lose the info when you did the last change!
+    - rename output after each step (e.g. "step1", "step2", ...)
+- NEVER do changes by hand in excel, or if yes, report them VERY detailed in script
+
+- not specifying which package is used data.table::melt() or reshape2::melt()
+
+
+
+# From wide to long and back
+
+See nice reshape2 tutorial at : https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html
+
+adding the situation where a row is duplicated and default function length is used!!! common mistake.
+
