@@ -1,6 +1,6 @@
 ---
-title: "S2 - Data wrangling in R"
-author: "N. Schenk"
+title: "Beginner -  Data wrangling in R"
+author: "N. Schenk, C.Daniel"
 date: "2022-11-09"
 output: html_document
 ---

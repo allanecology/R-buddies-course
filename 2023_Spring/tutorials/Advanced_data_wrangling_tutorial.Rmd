@@ -133,10 +133,10 @@ specieswise_varespec <- data.frame(names = names(varespec),
 rownames(specieswise_varespec) <- NULL
 
 # plotting
-ggplot(specieswise_varespec, aes(x = names, y = specieswise_means)) +
+ggplot(specieswise_varespec, aes(x = names, y = specieswise_mean)) +
   geom_point() +
-  geom_errorbar(aes(ymin = specieswise_means - specieswise_sd, 
-                    ymax = specieswise_means + specieswise_sd)) +
+  geom_errorbar(aes(ymin = specieswise_mean - specieswise_sd, 
+                    ymax = specieswise_mean + specieswise_sd)) +
   coord_flip()
 #TODO : this plot still misses a nice title and nicer axis labels, and maybe some extras like colors? Would you feel to add this and send to us, so the tutorial gets nicer?
 ```
