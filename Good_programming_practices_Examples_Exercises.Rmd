@@ -17,12 +17,28 @@ library(data.table)
 library(reshape2)
 library(tidyr)
 library(styler)
+library(renv)
 
 path_to_data <- "example_data_synthesis_helpdesk/"
 path_to_output <- "R_outputs_and_plots/"
 
 set.seed(12) # always generate the same random numbers, every time you run this script
 ```
+
+With the `renv` package, the environment can be saved and re-loaded. This means, all your packages and their versions are stored and can automatically be reloaded by the next user. Would you like to practice this? See [this tutorial](https://rstudio.github.io/renv/articles/renv.html).
+
+More about [reproducible workflows in RStudio](https://www.geo.uzh.ch/microsite/reproducible_research/post/rr-r-publication/).
+
+*Additional* : Running the code below, you can learn about the option to "answer" to an input from RStudio. Just try out the code below, following the instructions.
+
+```{r}
+# To just see what will be written in your lockfile, run the following:
+# and write "n" to the console when it asks you if you would like to activate this project vefore snapshot() is called.
+# (for your own project, you will ofcorse activate the project.)
+# When asking if you would like to proceed : "N"
+renv::snapshot()
+```
+
 
 ## Good Coding practices
 
@@ -55,6 +71,20 @@ Add structure to your file
 #      TITLE        # ----
 #                   #
 # # # # # # # # # # #
+
+# # # # # # # #
+# 1 - PART 1  # ----
+# # # # # # # #
+
+# # # # # # # #
+# 1.a - PART 1.a  # ----
+# # # # # # # #
+
+# # # # # # # #
+# 2 - PART 2  # ----
+# # # # # # # #
+
+# ...
 ```
 
 
@@ -198,6 +228,11 @@ max(example$abundance)
 View(example)
 barplot(height = example$abundance, names.arg = example$species)
 example$abundance
+
+# test and throw an error
+if(nrow(na.omit(example)) != nrow(example)){
+  stop("The function requires complete data, but the dataset contains NA values.")
+}
 ```
 
 
