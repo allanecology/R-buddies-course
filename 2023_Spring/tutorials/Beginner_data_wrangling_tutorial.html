@@ -437,17 +437,17 @@ handling very large datasets quite fast.</p>
 <h1>useful functions in R base</h1>
 <pre class="r"><code># basic functions helpufl for dataset wrangling
 vec &lt;- c(1, 2, 3, 4, 5) # create example vector
-vec &gt; 3                 # show for each element of the vector if the statement is true or fals</code></pre>
+vec &gt; 3                 # show for each element of the vector if the statement is true or false</code></pre>
 <pre><code>## [1] FALSE FALSE FALSE  TRUE  TRUE</code></pre>
 <pre class="r"><code>sum(vec &gt; 3)            # R interprets T as 1 and F as 0. We can therefore use sum() to count the number of times T occurs.</code></pre>
 <pre><code>## [1] 2</code></pre>
 <pre class="r"><code>                        #    in other words, count the number of times the statement is true for our vector
 which(vec &gt; 3)          # show the indices of the vector for which the statemetn is true</code></pre>
 <pre><code>## [1] 4 5</code></pre>
-<pre class="r"><code>                        #    in other words, the 4th and 5th element of the vector are larger than 3
-
-
-# load example dataset
+<pre class="r"><code>                        #    in other words, the 4th and 5th element of the vector are larger than 3</code></pre>
+<p><strong>Exercise 1:</strong> Try to do the same with a character
+string instead of a numeric string <br></p>
+<pre class="r"><code># load example dataset
 data(iris)
 
 
@@ -867,12 +867,20 @@ stats::aggregate(iris, Sepal.Length ~ Species, mean) # calculate the mean Sepal.
 ## [106] 19.3 13.6 18.3 16.8 19.4 16.8 16.3 17.4 15.2 16.1 17.2 16.8 20.4 19.5 14.7
 ## [121] 18.1 15.3 19.2 15.7 17.8 18.2 15.6 15.8 16.9 17.6 18.2 20.1 17.0 15.7 15.7
 ## [136] 19.1 17.7 16.8 15.6 17.5 17.8 17.4 15.5 18.2 18.2 17.2 15.7 16.7 17.3 15.8</code></pre>
-<p>Other useful functions to be potentially added : - from
-<code>reshape2</code> package : <code>melt()</code> and
-<code>dcast()</code> to get from long to wide dataset format - from
-<code>R base</code> : - <code>rbind()</code> and <code>cbind()</code> to
-combine two datasets (without using a common column) -
-<code>merge()</code> to combine two datasets by a common column</p>
+<p>Other useful functions to be potentially added : <br></p>
+<ul>
+<li>from <code>reshape2</code> package : <code>melt()</code> and
+<code>dcast()</code> to get from long to wide dataset format</li>
+</ul>
+<p><br></p>
+<ul>
+<li>from <code>R base</code> : <code>rbind()</code> and
+<code>cbind()</code> to combine two datasets (without using a common
+column), or <code>merge()</code> to combine two datasets by a common
+column</li>
+</ul>
+<p><br></p>
+<p>(For more info, see advanced data wrangling tutorial)</p>
 </div>
 <div id="examples" class="section level1">
 <h1>Examples</h1>
@@ -1615,6 +1623,9 @@ dt_iris[Species == &quot;setosa&quot;, ]</code></pre>
 ## 49:          5.3         3.7          1.5         0.2  setosa
 ## 50:          5.0         3.3          1.4         0.2  setosa
 ##     Sepal.Length Sepal.Width Petal.Length Petal.Width Species</code></pre>
+<p><strong>Exercise 2:</strong> Try to remove two species using
+conditional operators</p>
+<p><br></p>
 </div>
 </div>
 <div id="discussion" class="section level1">
@@ -1627,13 +1638,13 @@ far.</li>
 suitable for Ecology and which are rather a disadvantage?</li>
 </ul>
 </div>
-<div id="rmarkdown-exercise" class="section level1">
-<h1>Rmarkdown exercise</h1>
+<div id="bonus-rmarkdown-exercises" class="section level1">
+<h1>Bonus Rmarkdown exercises</h1>
 <ul>
 <li>Apply changes to this script in a way that the knitted html document
 does not contain all the very long ouputs of the iris dataset.</li>
 <li>Change a numeric variable of the “iris” dataset into a factor, then
-into a character string without changing the values themselves. ¨</li>
+into a character string without changing the values themselves.</li>
 </ul>
 </div>
 
