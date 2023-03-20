@@ -70,6 +70,30 @@ apply(varespec[, which(names(varespec) %in% varespec_columns_to_log_transform)],
 ```
 
 
+## Exercises "aggregate"
+
+**Exercise 1** : Use the dataset "experimental_data_long". Calculate the mean plant height per experimental treatment.
+```{r}
+aggregate(plantheight ~ treatment, FUN = mean, data = experimental_data_long)
+```
+
+**Exercise 2** : Use the dataset "experimental_data_long". Calculate the mean plant height per experimental treatment, excluding the treatment "C".
+```{r}
+aggregate(plantheight ~ treatment, FUN = mean, data = experimental_data_long[!which(experimental_data_long$treatment == "C")])
+```
+
+
+**Exercise 3** : "Duplicated rows" : use the dataset "experimental_data_long_dup", and calculate the mean height per treatment as in Exercise 1.
+```{r}
+aggregate(plantheight ~ treatment, FUN = mean, data = experimental_data_long_dup)
+# aggregate does not check for duplicated rows - here it includes the duplicated row just as the others and includes it to the mean.
+```
+
+**Exercise 3** : Calculate the mean plant height of each combination of treatment and subtreatment (e.g. the mean plant height in treatment "A", "wet", the mean in treatment "A", "dry", ...)
+```{r}
+aggregate(plantheight ~ treatment + subtreatment, FUN = mean, data = experimental_data_long)
+```
+
 
 
 

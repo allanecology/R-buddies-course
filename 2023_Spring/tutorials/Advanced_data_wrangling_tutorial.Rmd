@@ -30,11 +30,11 @@ Topics/ functions :
 **Packages**
 
 ```{r, echo = T, message=FALSE}
-library(vegan)
-library(ggplot2)
+library(vegan) # for the example datasets
+library(ggplot2) # for plotting
 library(missForest) # adding missing data
-library(naniar)
-library(data.table)
+library(naniar) # to generate the missing values
+library(data.table) # a data wrangling package (similar to tidyverse)
 
 set.seed(0)
 ```
@@ -156,8 +156,44 @@ apply internally calls a loop in the R language, so in this situation there is n
 Similar to apply. Check out [this tutorial](https://www.r-bloggers.com/2018/07/how-to-aggregate-data-in-r/)
 
 ```{r}
-#TODO add exercises
+# generate a dataset for practice purpose : 
+experimental_data_long <- data.table(plotname = paste0("plot", 1:50),
+           treatment = as.factor(c(rep("A", 10), c(rep("B", 10)), c(rep("C", 10)), c(rep("D", 10)), c(rep("E", 10)))),
+           subtreatment = as.factor(rep(rep(c("dry", "wet"), 5), 5)),
+           plantheight = c(rnorm(10, mean = 5, sd = 1), 
+                           rnorm(10, mean = 9, sd = 1),
+                           rnorm(10, mean = 4, sd = 1),
+                           rnorm(10, mean = 3.5, sd = 1),
+                           rnorm(10, mean = 8, sd = 1)))
+
+# create example dataset 2
+experimental_data_long_dup <- rbindlist(list(experimental_data_long, experimental_data_long[1, ]))
 ```
+
+## Exercises "aggregate"
+
+**Exercise 1** : Use the dataset "experimental_data_long". Calculate the mean plant height per experimental treatment.
+```{r}
+
+```
+
+**Exercise 2** : Use the dataset "experimental_data_long". Calculate the mean plant height per experimental treatment, excluding the treatment "C".
+```{r}
+
+```
+
+
+**Exercise 3** : "Duplicated rows" : use the dataset "experimental_data_long_dup", and calculate the mean height per treatment as in Exercise 1.
+```{r}
+
+```
+
+**Exercise 3** : Calculate the mean plant height of each combination of treatment and subtreatment (e.g. the mean plant height in treatment "A", "wet", the mean in treatment "A", "dry", ...)
+```{r}
+
+```
+
+
 
 # missing data
 
