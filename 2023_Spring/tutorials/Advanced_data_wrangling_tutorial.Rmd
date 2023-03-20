@@ -24,9 +24,10 @@ Topics/ functions :
 - data wrangling pitfalls and how to avoid them
     - functions : cbind, rbind, merge
 - from wide to long and back (reshape2 melt and dcast)
-- imputation of missing data
 
-## Requirements  {-}
+*Note* that unfortunately, this tutorial is not finished yet. If you see interesting topics to be added, please indicate. If you are working on a topic and miss some more material about it, please indicate.
+
+## Requirements
 
 
 **Packages**
@@ -180,6 +181,11 @@ apply internally calls a loop in the R language, so in this situation there is n
 If you are interested in those type of considerations, you might consider [this post](http://rstudio-pubs-static.s3.amazonaws.com/5526_83e42f97a07141e88b75f642dbae8b1b.html).
 
 
+# aggregate
+Similar to apply. Check out [this tutorial](https://www.r-bloggers.com/2018/07/how-to-aggregate-data-in-r/)
+```{r}
+#TODO add exercises
+```
 
 
 
