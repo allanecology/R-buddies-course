@@ -1,0 +1,14 @@
+---
+title: "R_buddies_session_1_minutes"
+author: "Caroline"
+format: html
+editor: visual
+---
+
+## Reproducible code
+
+Placeholder
+
+## Topics ideas
+
+Placeholder
