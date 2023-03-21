@@ -114,6 +114,10 @@ varespec[, c("Dicrfusc", "Dicrpoly", "Hylosple", "Pleuschr", "Polypili", "Polyju
 # running the apply function on the subset :
 apply(varespec[, c("Dicrfusc", "Dicrpoly", "Hylosple", "Pleuschr", "Polypili", "Polyjuni", "Polycomm", "Pohlnuta", "Ptilcili", "Barbhatc", "Cladarbu", "Cladrang")], 
       2, FUN = function(x) sum(is.na(x)))
+pdf("test.pdf")
+plot(varechem$N, varechem$pH)
+dev.off()
+getwd()
 ```
 
 
