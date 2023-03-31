@@ -38,21 +38,23 @@ data("RIKZ")
 You can use the data introduced below or your own data. If you use your own data, you will have to adapt the code to your data.
 
 
-"RIKZ" is a data set of Alain Zuur, author of the book "Mixed effects models and extensions in ecology with R" (2009). It's in the AED package, which you find on github. The data set is on macrofauna species richness (response variable) measured at 9 different beaches at different distances from the sampling station to the tidal level (NAP) and at different expositions. The main interest is whether NAP and exposition affect macrofauna species richness. 
+"RIKZ" is a data set of Alain Zuur, author of the book "Mixed effects models and extensions in ecology with R" (2009). The dataset (and a few more things) are in the AED package, which you find on github. The RIKZ data set is on macrofauna species richness (response variable) measured at 9 different beaches at different distances from the sampling station to the tidal level (NAP) and at different expositions. The main interest is whether NAP and exposition affect macrofauna species richness. 
 
 # Mixed models
 
-Mixed effect models contain two types of effects: fixed and random effects. If we have repeated measures over time or space, we perform mixed effect models to account for the non independence between our measurements. Independence is a key assumption of linear regression. Non-independence can occur both in field and experimental studies. 
+Mixed effect models contain two types of effects: fixed and random effects. If we have repeated measures over time or space, we perform mixed effect models to account for the non independence between our measurements. Independence is a key assumption of linear regression. Non-independence can occur both in field and experimental studies, when we for example repeat a given experiment on different beaches.
+
+In modelling, a parameter is fit to each level of a factor. In a fixed model, that means e.g. to each beach. Every time a model fits a parameter, we use a part of our observations (our degrees of freedom) for this. In the end, the model uses all degrees of freedom (observations) which are left to test the model. The more degrees of freedom (or observation) we use for fitting parameters, the less are left for testing the model, in other words the less power we have in the end. It therefore makes sense to think well where we want to invest our precious observations - for fitting a factor in which levels we are not really interested? Or rather in testing the model with the variables we are really interested in? Random effects are a useful way to include factors in our model, which we on one hand have to include because we feel they are important to consider, and on the other hand are not really interested in their actual effect size. E.g. in the example of beaches, we might not be interested in which of the beaches has the highest species diversity (we don't really need a model for that), but rather in the effect of exposure on species richness in general (generalised on different beaches).
 
 *Exercise 1*: 
 
 * give an example of a random effect within an experimental and within a field study
 * think of fixed and random (nested or crossed?) effects in your own study
 
-**Random effects**: a way of grouping the data, which explains part of the variance but in which we are not interested in. Random effects have a random number of levels (varying rule of thumb: at least 3, 4 or levels - depending on the reference) in which we are not interested in. We do not have hypotheses for random effects and do not expect an effect in a specific direction.
-Random effects can be crossed (occur across the whole dataset) or nested (levels of one random effect occur only in levels of a hierarchically higher random effect, e.g if you have plots in different fields). Crossed random effects: `(1|random effect 1) + (1|random effect 2)`, nested random effects: `(1|random effect 1 / random effect 2)`
+**Random effects**: a way of grouping the data, which explains part of the variance but in which we are not interested in modelling. Random effects have a random number of levels (varying rule of thumb: at least 3, 4 or levels - depending on the reference) in which we are not interested in. We do not have hypotheses for random effects and do not expect an effect in a specific direction.
+Random effects can be crossed (occur across the whole dataset) or nested (levels of one random effect occur only in levels of a hierarchically higher random effect, e.g if you have plots in different fields). Crossed random effects: `(1|random effect 1) + (1|random effect 2)`, nested random effects: `(1|random effect 1 / random effect 2)`. 
 
-**Fixed effects**: effects in which we are interested in (direction and strength of effects). In other words, we are interested in the differences between the levels of a fixed effect. fixed effects have a fixed number of levels, which are specifically chosen for a reason and not randomly created (e.g if you are interested in the effect of different drought periods on plant performance, you specifically chose and set different levels of drought levels in your experiment). Fixed effects have normally only few levels and the levels are informative (short drought period means less stress than longer drought period).
+**Fixed effects**: effects in which we are interested in (direction and strength of effects). In other words, we are interested in the differences between the levels of a fixed effect. Fixed effects have a fixed number of levels, which are specifically chosen for a reason, and not randomly created (e.g if you are interested in the effect of different drought periods on plant performance, you specifically chose and set different levels of drought levels in your experiment). Fixed effects usually have only few levels and the levels are informative (short drought period means less stress than longer drought period).
 
 
 
@@ -126,9 +128,81 @@ r.squaredGLMM(mod2)
 
 ```
 # Model summary table
+The model summary table is explained here, with the example of mod2.
+```{r}
+summary(mod2)
+```
+* **header** : In the header, doublecheck the method you chose (ML or REML) and if this is what you aimed to do.
 
-* Random effects std.dev: between levels variance (here: variance between beaches). std.dev(residuals): residual variance
-* ...
+* **AIC and BIC** are a measure of relative model fit, penalised by number of parameters. They are used to compare models with each other, where lower AIC and BIC values indicate a better fit. With "penalised by number of parameters", we mean that a model with a good fit and a low number of parameters is preferred over a model with a slightly better fit, but a higher number of parameters (i.e. higher number of variables).
+
+* **Residual degrees of freedom** : "df.resid" The residual degrees of freedom are the initial degrees of freedom - the number of parameter you fitted. In other words, the number of observations minus the number of factors, variables and random effect terms you have in your model. Shortly, make sure this number is not too low (not too far away from the number of observations). The nearer this number is to the number of observations, the more power you have.
+
+* **Random effect** : For each random effect (each variable you include to the model as random), the model fits a normal distribution with mean 0 and a variance. The variance is reported in the "Variance" section. lme4 also reports the Std.Dev. = the standard deviation, which is simply the square root of the variance (not an accuracy measure of the variance itself). The residual variance is reported as well, this is the part of the variance the model can not explain with the random effects. A very low value of random effect variance and a very high value of residual variance indicates that the random effect might not be as important and you could consider excluding it. However, often it is good to keep the random effects if they are correcting for hierarchical structures in your experimental design.
+
+  * **Number of obs** : shows you on how many observations the model was fit. It is important to check if this number corresponds to the number of rows in your dataset. If it does not, check if you have NA values which were automatically excluded.
+  
+```{r}
+nrow(RIKZ) == 45
+```
+
+* **Fixed effects** : this part is similar to the linear model output :
+  * For numeric variables, you get an estimate of the slope and a standard error, as well as a separate estimate of the intercept.
+  * For factors, you get an estimate of each level of the factor. The first level of the factor is reported as "Intercept", the second is shown with the name of your factor and the level.
+
+* Correlations of fixed effects : You get a full correlation matrix of all variables and factor levels of your dataset.
+
+## Exercises
+
+
+Interpreting the summary output
+
+```{r}
+#TODO add exercises
+```
+
+
+
+
+(1.1) Fit a mixed effect model on a subset of the RIKZ dataset, where you only include the observations with Exposure 10. Use Exposure as fixed effect, and Beach as random effect.
+```{r}
+# Solution
+mod_ex1 <- lmer(Richness ~ Exposure + (1 | Beach), REML = F, data = RIKZ[which(RIKZ$Exposure == 10), ])
+# The function throws an error, because there is only one level of the factor. 
+```
+(1.1.b) Explain why the model threw an error.
+```{r}
+# Solution
+# because all levels of "Exposure" are the same, we do not need "Exposure" as factor in our model if all observations are from the same exposure.
+mod_ex1b <- lmer(Richness ~ (1 | Beach), REML = F, data = RIKZ[which(RIKZ$Exposure == 10), ])
+summary(mod_ex1b)
+```
+
+(1.2) Fit a mixed effect model on a subset of the RIKZ dataset, where you only include the observations from Beach 6. Use Exposure as fixed effect, and Beach as random effect.
+```{r}
+# Solution
+mod_ex2 <- lmer(Richness ~ (1 | Beach), REML = F, data = RIKZ[which(RIKZ$Beach == 6), ])
+# again, we need more than 1 level in the random effect.
+```
+(1.2.b) Fit a mixed effect model on a subset of the RIKZ dataset, where you only include the observations from Beach 6 and 1. Use Exposure as fixed effect, and Beach as random effect. Try to explain why you see what you see.
+```{r}
+# Solution
+mod_ex2 <- lmer(Richness ~ Exposure + (1 | Beach), REML = F, data = RIKZ[which(RIKZ$Beach %in% c(1,6)), ])
+help('isSingular')
+# There is a minimum amount of variance we need to fit a model at all. In our example, the variables beach and exposure explain exactly the same :
+table(RIKZ[which(RIKZ$Beach %in% c(1,6)), c("Exposure", "Beach")])
+# See that for most beaches and most exposures, we do not have a single observation
+# In fact, all beaches with exposure 11 are from beach 6, and all beaches with exposure 10 are from beach 1.
+table(RIKZ[, c("Exposure", "Beach")])
+# A given beach is at a fixed exposure, we have some variance only because various beaches were measured per exposure level.
+```
+
+
+
+
+
+
+
 
 # Model validation
 We validate our model based on the model assumptions that the **residuals are identically and independently distributed**:
