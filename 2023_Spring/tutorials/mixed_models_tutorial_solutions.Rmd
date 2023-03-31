@@ -1,0 +1,208 @@
+---
+title: "Mixed model tutorial"
+author: "R buddies"
+date: "2023-03-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+```{css, echo=FALSE}
+.scroll-200 {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: inherit;
+}
+```
+
+```{r packages and data, class.output = "scroll-200"}
+# packages
+library(lme4)
+library(ggplot2)
+library(MuMIn) # to get the R squared of the mixed model and for model simplification (not covered here, but you could apply the function dredge() to simplify your full model)
+library(arm) # to simulate data based on model estimates
+
+# data
+# AED is the package accompanying the Book from Zuur et al.
+# install.packages("remotes")
+# remotes::install_github("romunov/AED")
+library(AED)
+data("RIKZ")
+
+```
+
+# Data
+
+You can use the data introduced below or your own data. If you use your own data, you will have to adapt the code to your data.
+
+
+"RIKZ" is a data set of Alain Zuur, author of the book "Mixed effects models and extensions in ecology with R" (2009). It's in the AED package, which you find on github. The data set is on macrofauna species richness (response variable) measured at 9 different beaches at different distances from the sampling station to the tidal level (NAP) and at different expositions. The main interest is whether NAP and exposition affect macrofauna species richness. 
+
+# Mixed models
+
+Mixed effect models contain two types of effects: fixed and random effects. If we have repeated measures over time or space, we perform mixed effect models to account for the non independence between our measurements. Independence is a key assumption of linear regression. Non-independence can occur both in field and experimental studies. 
+
+*Exercise 1*: 
+
+* give an example of a random effect within an experimental and within a field study
+* think of fixed and random (nested or crossed?) effects in your own study
+
+**Random effects**: a way of grouping the data, which explains part of the variance but in which we are not interested in. Random effects have a random number of levels (varying rule of thumb: at least 3, 4 or levels - depending on the reference) in which we are not interested in. We do not have hypotheses for random effects and do not expect an effect in a specific direction.
+Random effects can be crossed (occur across the whole dataset) or nested (levels of one random effect occur only in levels of a hierarchically higher random effect, e.g if you have plots in different fields). Crossed random effects: `(1|random effect 1) + (1|random effect 2)`, nested random effects: `(1|random effect 1 / random effect 2)`
+
+**Fixed effects**: effects in which we are interested in (direction and strength of effects). In other words, we are interested in the differences between the levels of a fixed effect. fixed effects have a fixed number of levels, which are specifically chosen for a reason and not randomly created (e.g if you are interested in the effect of different drought periods on plant performance, you specifically chose and set different levels of drought levels in your experiment). Fixed effects have normally only few levels and the levels are informative (short drought period means less stress than longer drought period).
+
+
+
+*Exercise 2*: Plot your data (y and x variable of interest)
+```{r plot data, class.output = "scroll-200", out.width= '50%'}
+# check data
+str(RIKZ)
+
+# turn "Exposure" and "Beach" to factors
+RIKZ$Exposure <- as.factor(RIKZ$Exposure)
+RIKZ$Beach <- as.factor(RIKZ$Beach)
+
+# plot Richness along NAP levels for different Exposures:
+
+ggplot(RIKZ, aes(x = NAP, y = Richness)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  facet_wrap(~Exposure) +
+  theme_classic()
+
+# or
+
+ggplot(RIKZ, aes(x = NAP, y = Richness, color = Exposure)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  theme_classic()
+
+# include Beaches:
+
+ggplot(RIKZ, aes(x = NAP, y = Richness, color = Beach)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              se = F) +
+  facet_wrap(~Exposure) +
+  theme_classic()
+
+
+```
+
+
+
+**Likelihood method**
+
+Mixed effect models can be fitted with the maximum likelihood (ML) or the restricted maximum likelihood method (REML). ML: Underestimates the variance parameters, but is unbiased for the fixed effects. REML: Gives unbiased estimates for the variance components but is biased for the fixed effects. If you are interested in the fixed effects, use ML, if you are interested in random effects, use REML. If you are familiar with algebra, you might understand the difference between the methods -> Zuur et al. (2009) page 116.
+
+*Exercise 3*: Fit different linear mixed effect models; with one or more explanatory variables, with and without an interaction, with and without restricted maximum likelihood (REML = TRUE/FALSE) and discuss differences between the models in the model summary table.
+
+```{r Fit linear mixed model with ML and REML, class.output = "scroll-200"}
+# Maximum likelihood method
+mod1 <- lmer(Richness ~ NAP * Exposure # fixed terms and their interaction
+             + (1|Beach), # random term
+             REML = FALSE, # likelihood method (default is REML = T)
+             data = RIKZ)
+
+mod2 <- lmer(Richness ~ NAP # fixed terms and their interaction
+             + (1|Beach), # random term
+             REML = FALSE, # likelihood method (default is REML = T)
+             data = RIKZ)
+
+mod3 <- lm(Richness ~ NAP, data = RIKZ) # check difference to lm (without accounting for different beaches)
+
+summary(mod3) # model including interactions: exposure and NAP are both significant but not the interaction. NAP has a ** negative effect (estimate= -4.17)
+# the model including only NAP gives a *** negative NAP effect (estimate= -2.57)
+# the linear model gives a *** negative NAP effect (estimate = -2.87)
+
+r.squaredGLMM(mod2)
+# including beach as random effect increases the R2 of the model (explained variance)
+
+# Check if things change if you use the restricted maximum likelihood method
+
+
+```
+# Model summary table
+
+* Random effects std.dev: between levels variance (here: variance between beaches). std.dev(residuals): residual variance
+* ...
+
+# Model validation
+We validate our model based on the model assumptions that the **residuals are identically and independently distributed**:
+
+* independent residuals: do not correlate with other variables, are not grouped and are not autocorrelated (spatially or temporally)
+* identically distributed residuals: all residuals come from the same distribution; the normal distribution assumes homogeneity of variance (no pattern in residuals) and the mean of the residuals across all predictors should be zero
+
+*Exercise 4*: which of your models is the best model based on visual validation? How could you improve your model? What else can we consider when we validate our model?
+
+```{r plot residuals against fitted, class.output = "scroll-200"}
+
+# Assessing model assumptions
+# 1. Homogeneity of variance: 
+  # residuals vs fitted values
+par(mfrow=c(2,2), mar=c(4,4,2,1), mgp=c(2.2,0.8,0))
+scatter.smooth(fitted(mod1), resid(mod1)); abline(h=0, lty=2)
+mtext("Tukey-Anscombe Plot", 3, line=0.8, cex=0.8)#,family="A")
+
+  # residual variance against fitted
+scatter.smooth(fitted(mod1), sqrt(abs(resid(mod1))))
+
+# 2. Normality of residuals: qq of residuals
+qqnorm(resid(mod1), main="Normal qq-plot, residuals", cex.main=0.8)
+qqline(resid(mod1))
+  
+  # normality of random effects
+qqnorm(ranef(mod1)$Beach[,1], main="Normal qq-plot, random effects", cex.main=0.8)
+qqline(ranef(mod1)$Beach[,1]) # something is strange here... random effects explain zero variance
+
+```
+
+
+
+
+```{r compare model simulated data with raw data, class.output = "scroll-200"}
+# simulate 1000 random samples with your model (based on model estimates)
+nsim=1000 
+bsim=sim(mod1,n.sim=nsim)
+bsim
+
+fitmat=matrix(ncol=nsim,nrow=nrow(RIKZ)) # calculate a matrix out of these simulations
+yrep=matrix(ncol=nsim,nrow=nrow(RIKZ))
+
+newdat=expand.grid(NAP = seq(range(RIKZ$NAP)[1],range(RIKZ$NAP)[2], by = 0.01), Exposure=levels(RIKZ$Exposure))
+
+# create a new data frame
+Xmat=model.matrix(~ NAP * Exposure, data=newdat)  # use exactly the same formula as for the fixed-effect part in the model specification
+
+# with credible intervals
+fitmat=matrix(ncol=nsim, nrow=nrow(newdat)) # fitmap are estimates of the mean
+for(i in 1:nsim) fitmat[,i]=Xmat %*% bsim@fixef[i,] # fitted values
+newdat$lower=apply(fitmat, 1, quantile, prob=0.025) # credible interval lower bound
+newdat$upper=apply(fitmat, 1, quantile, prob=0.975) # credible interval upper
+newdat$fit=Xmat %*% fixef(mod1)
+
+# check if simulated data fits to raw data
+for(i in 1:nsim){
+  fitmat[,i]=Xmat %*% bsim@fixef[i,]
+  yrep[,i]=rnorm(n=nrow(RIKZ), mean=fitmat[,i], sd = sd(fitmat[,i]))
+}
+par(mfrow=c(3,3)) # fenster reihen/spalten
+random=sample(1:nsim,9) # nbr of simulations - er nimmt einfach 9 simulationen aus den 1000 die er für newdat gerechnet hat
+for (i in 1:9) {
+  if(i==5) {
+    hist(RIKZ$NAP)
+  } else hist(yrep[,random[i]])
+}
+
+
+```
+
+
+# References
+
+Zuur, A. F., Ieno, E. N., Walker, N. J., Saveliev, A. A., & Smith, G. M. (2009). Mixed effects models and extensions in ecology with R (Vol. 574, p. 574). New York: springer.
+
+Dr. Eva Malecore; course on mixed effect models, IPS Bern
