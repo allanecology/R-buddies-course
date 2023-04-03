@@ -23,6 +23,7 @@ library(lme4)
 library(ggplot2)
 library(MuMIn) # to get the R squared of the mixed model and for model simplification (not covered here, but you could apply the function dredge() to simplify your full model)
 library(arm) # to simulate data based on model estimates
+library(tidyverse)
 
 # data
 # AED is the package accompanying the Book from Zuur et al.
@@ -127,6 +128,8 @@ r.squaredGLMM(mod2)
 
 
 ```
+
+
 # Model summary table
 The model summary table is explained here, with the example of mod2.
 ```{r}
@@ -178,6 +181,40 @@ mod_ex4e <- lmer(Richness ~ NAP + Exposure + (1|Beach),
 
 # the slope of NAP decreases if the interaction with Exposure is removed from the model. But, also the std.error decreases
 # which model to choose? 
+
+
+# 4.4. Use the model used in Exercise 4.1 (mod_ex4b) using NAP as a fixed, and Beach as a random term. The mixed effect model with 
+# random intercept, which we are using here, models the intercept from each beach as "realisations" (=samples) from a normal distribution
+# around the fixed intercept. In other words, we have a "global" intercept (a global linear model), and around this, we have the intercepts (the lines) of the individual beaches. The Intercept of all the individual lines lay around the "global" intercept, and their distance is 
+# given by the random intercept variation.
+# Try to draw or plot the "global" model (fixed effect) and the intercept of all nine beaches around this global model.
+mod_ex4b <- lmer(Richness ~ NAP + (1|Beach),
+                 REML = FALSE, 
+                 data = RIKZ)
+summary(mod_ex4b) # the global intercept is 6.5844
+#                   the variance around the intercept is 7.51, that means the standard deviation is the 
+#                     square root of the variance, which is sqrt(7.51) = 2.74
+# We can get the estimates of each random effect with the coef function
+coef(mod_ex4b)
+# Plotting
+plot(RIKZ$NAP, fitted(mod_ex4b))
+abline(coef = c(6.58, -2.575), lwd = 3) # reading intercept and slope from the summary output
+for(i in 1:length(unique(RIKZ$Beach))){
+  abline(coef = coef(mod_ex4b)$Beach[i , ])
+}
+# global model = the population model in bold
+# the individual beach models in non-bold
+
+# Plotting : only plot the intercepts, and the normal distribution around them.
+hist(coef(mod_ex4b)$Beach[, 1])
+x <- seq(-20, 20, length=100)
+y <- dnorm(x, mean = 6.5844, sd = 2.740)
+plot(x, y, type = "l", lwd = 2, ylab = "Density", xlab = "Richness Intercept")
+abline(v = 6.5844, col = "red", lwd = 2)
+for(i in 1:length(unique(RIKZ$Beach))){
+  abline(v = coef(mod_ex4b)$Beach[i , 1], col = "gray")
+}
+# Source : Exercises adapted from Zuur et al. 2009, Chapter 5 p. 108
 ```
 
 
@@ -229,9 +266,14 @@ We validate our model based on the model assumptions that the **residuals are id
 * independent residuals: do not correlate with other variables, are not grouped and are not autocorrelated (spatially or temporally)
 * identically distributed residuals: all residuals come from the same distribution; the normal distribution assumes homogeneity of variance (no pattern in residuals) and the mean of the residuals across all predictors should be zero
 
+Further, we can assess the general model fit by comparing the fitted (predicted) and observed values. (First step in below code.)
+
 *Exercise 4*: which of your models is the best model based on visual validation? How could you improve your model? What else can we consider when we validate our model?
 
 ```{r plot residuals against fitted, class.output = "scroll-200"}
+# Assessing global model fit
+plot(fitted(mod1), RIKZ$Richness)
+abline(0, 1)
 
 # Assessing model assumptions
 # 1. Homogeneity of variance: 
@@ -249,8 +291,12 @@ qqline(resid(mod1))
   
   # normality of random effects
 qqnorm(ranef(mod1)$Beach[,1], main="Normal qq-plot, random effects", cex.main=0.8)
-qqline(ranef(mod1)$Beach[,1]) # something is strange here... random effects explain zero variance
+qqline(ranef(mod1)$Beach[,1]) 
+# Interpretation : bad model.. random effects explain zero variance.
 
+# example with mod2, where variance of random effect is not 0
+qqnorm(ranef(mod2)$Beach[,1], main="Normal qq-plot, random effects", cex.main=0.8)
+qqline(ranef(mod2)$Beach[,1])
 ```
 
 
