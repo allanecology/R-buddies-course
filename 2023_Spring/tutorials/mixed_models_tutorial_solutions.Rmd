@@ -152,13 +152,32 @@ nrow(RIKZ) == 45
 
 * Correlations of fixed effects : You get a full correlation matrix of all variables and factor levels of your dataset.
 
-## Exercises
-
-
-Interpreting the summary output
+*Exercise 4*: Interpreting the summary output
 
 ```{r}
-#TODO add exercises
+# 4.1: Compare the summary output of the two models; what changes? Which one would you prefer and why?
+mod_ex4a <- lmer(Richness ~ NAP + (1|Exposure),
+                 REML = FALSE, data = RIKZ)
+
+mod_ex4b <- lmer(Richness ~ NAP + (1|Beach),
+                 REML = FALSE, data = RIKZ)
+
+# 4.2: What happens with the effect of NAP in the following model and why? 
+
+mod_ex4c <- lmer(Richness ~ NAP + (1|Beach),
+                 REML = FALSE, 
+                 data = RIKZ %>% group_by(Beach) %>% sample_frac(size = 1-0.59))
+
+
+# 4.3: What happens with the effect of NAP depending on how NAP is fitted? 
+mod_ex4d <- lmer(Richness ~ NAP * Exposure + (1|Beach),
+                 REML = TRUE, data = RIKZ)
+
+mod_ex4e <- lmer(Richness ~ NAP + Exposure + (1|Beach),
+                 REML = FALSE, data = RIKZ)
+
+# the slope of NAP decreases if the interaction with Exposure is removed from the model. But, also the std.error decreases
+# which model to choose? 
 ```
 
 
