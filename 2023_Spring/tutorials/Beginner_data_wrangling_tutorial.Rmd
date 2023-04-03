@@ -57,11 +57,18 @@ A very good starting point is this [vignette](https://cran.r-project.org/web/pac
 ```{r}
 # basic functions helpufl for dataset wrangling
 vec <- c(1, 2, 3, 4, 5) # create example vector
-vec > 3                 # show for each element of the vector if the statement is true or false
+vec > 2                 # show for each element of the vector if the statement is true or false
 sum(vec > 3)            # R interprets T as 1 and F as 0. We can therefore use sum() to count the number of times T occurs.
                         #    in other words, count the number of times the statement is true for our vector
 which(vec > 3)          # show the indices of the vector for which the statemetn is true
                         #    in other words, the 4th and 5th element of the vector are larger than 3
+
+
+species<- c("taraxacum","soldanella", "holcus", "veronica")
+
+grepl("soldanella",species)
+species=="soldanella"
+
 
 ```
 
@@ -170,15 +177,23 @@ Conclusion : The R base command is already longer than the commands from the spe
 
 ## Filtering rows
 Show all rows of a data.frame that contain the category "setosa" in the column "Species".
-```{r}
+```{r, echo=FALSE}
 # with R base
 iris[which(iris$Species == "setosa"), ]
+
+#subset
+subset(iris, iris$Species=="setosa"| iris$Species == "virginica")
 
 # with tidyverse
 dplyr::filter(iris, Species == "setosa")
 
 # with data.table
 dt_iris[Species == "setosa", ]
+
+iris$Species<-as.character(iris$Species)
+str(iris)
+iris$Species<-as.factor(as.character(iris$Species))
+
 ```
 
 **Exercise 2:** Try to remove two species using conditional operators
