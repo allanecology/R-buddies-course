@@ -234,6 +234,8 @@ new |>
   theme_bw()
 ```
 
+If you need to compute effects with random factors, I would recommend using the method with the `simulate` function described in Dean Marchiori's tutorial.
+
 <br>
 
 ## Potential discussion points
