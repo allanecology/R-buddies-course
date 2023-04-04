@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 }
 ```
 
-```{r packages and data, class.output = "scroll-200"}
+```{r packages and data, class.output = "scroll-200", eval = T}
 # packages
 library(lme4)
 library(ggplot2)
@@ -47,10 +47,17 @@ Mixed effect models contain two types of effects: fixed and random effects. If w
 
 In modelling, a parameter is fit to each level of a factor. In a fixed model, that means e.g. to each beach. Every time a model fits a parameter, we use a part of our observations (our degrees of freedom) for this. In the end, the model uses all degrees of freedom (observations) which are left to test the model. The more degrees of freedom (or observation) we use for fitting parameters, the less are left for testing the model, in other words the less power we have in the end. It therefore makes sense to think well where we want to invest our precious observations - for fitting a factor in which levels we are not really interested? Or rather in testing the model with the variables we are really interested in? Random effects are a useful way to include factors in our model, which we on one hand have to include because we feel they are important to consider, and on the other hand are not really interested in their actual effect size. E.g. in the example of beaches, we might not be interested in which of the beaches has the highest species diversity (we don't really need a model for that), but rather in the effect of exposure on species richness in general (generalised on different beaches).
 
-*Exercise 1*: 
+
+### Exercise 1 
 
 * give an example of a random effect within an experimental and within a field study
 * think of fixed and random (nested or crossed?) effects in your own study
+
+#### Solution 1
+...
+
+
+## Random and fixed effects
 
 **Random effects**: a way of grouping the data, which explains part of the variance but in which we are not interested in modelling. Random effects have a random number of levels (varying rule of thumb: at least 3, 4 or levels - depending on the reference) in which we are not interested in. We do not have hypotheses for random effects and do not expect an effect in a specific direction.
 Random effects can be crossed (occur across the whole dataset) or nested (levels of one random effect occur only in levels of a hierarchically higher random effect, e.g if you have plots in different fields). Crossed random effects: `(1|random effect 1) + (1|random effect 2)`, nested random effects: `(1|random effect 1 / random effect 2)`. 
@@ -59,7 +66,9 @@ Random effects can be crossed (occur across the whole dataset) or nested (levels
 
 
 
-*Exercise 2*: Plot your data (y and x variable of interest)
+### Exercise 2 : Plot your data (y and x variable of interest)
+
+#### Solution 2
 ```{r plot data, class.output = "scroll-200", out.width= '50%'}
 # check data
 str(RIKZ)
@@ -96,13 +105,14 @@ ggplot(RIKZ, aes(x = NAP, y = Richness, color = Beach)) +
 ```
 
 
-
-**Likelihood method**
+## Likelihood method
 
 Mixed effect models can be fitted with the maximum likelihood (ML) or the restricted maximum likelihood method (REML). ML: Underestimates the variance parameters, but is unbiased for the fixed effects. REML: Gives unbiased estimates for the variance components but is biased for the fixed effects. If you are interested in the fixed effects, use ML, if you are interested in random effects, use REML. If you are familiar with algebra, you might understand the difference between the methods -> Zuur et al. (2009) page 116.
 
-*Exercise 3*: Fit different linear mixed effect models; with one or more explanatory variables, with and without an interaction, with and without restricted maximum likelihood (REML = TRUE/FALSE) and discuss differences between the models in the model summary table.
+### Exercise 3
+Fit different linear mixed effect models; with one or more explanatory variables, with and without an interaction, with and without restricted maximum likelihood (REML = TRUE/FALSE) and discuss differences between the models in the model summary table.
 
+#### Solution 3
 ```{r Fit linear mixed model with ML and REML, class.output = "scroll-200"}
 # Maximum likelihood method
 mod1 <- lmer(Richness ~ NAP * Exposure # fixed terms and their interaction
@@ -155,8 +165,46 @@ nrow(RIKZ) == 45
 
 * Correlations of fixed effects : You get a full correlation matrix of all variables and factor levels of your dataset.
 
-*Exercise 4*: Interpreting the summary output
+### Exercises 4
+Interpreting the summary output
 
+```{r}
+# 4.1: Compare the summary output of the two models; what changes? Which one would you prefer and why?
+mod_ex4a <- lmer(Richness ~ NAP + (1|Exposure),
+                 REML = FALSE, data = RIKZ)
+
+mod_ex4b <- lmer(Richness ~ NAP + (1|Beach),
+                 REML = FALSE, data = RIKZ)
+
+# 4.2: What happens with the effect of NAP in the following model and why? 
+
+mod_ex4c <- lmer(Richness ~ NAP + (1|Beach),
+                 REML = FALSE, 
+                 data = RIKZ %>% group_by(Beach) %>% sample_frac(size = 1-0.59))
+
+
+# 4.3: What happens with the effect of NAP depending on how NAP is fitted? 
+mod_ex4d <- lmer(Richness ~ NAP * Exposure + (1|Beach),
+                 REML = TRUE, data = RIKZ)
+
+mod_ex4e <- lmer(Richness ~ NAP + Exposure + (1|Beach),
+                 REML = FALSE, data = RIKZ)
+
+
+
+# 4.4. Use the model used in Exercise 4.1 (mod_ex4b) using NAP as a fixed, and Beach as a random term. The mixed effect model with 
+# random intercept, which we are using here, models the intercept from each beach as "realisations" (=samples) from a normal distribution
+# around the fixed intercept. In other words, we have a "global" intercept (a global linear model), and around this, we have the intercepts (the lines) of the individual beaches. The Intercept of all the individual lines lay around the "global" intercept, and their distance is 
+# given by the random intercept variation.
+# Try to draw or plot the "global" model (fixed effect) and the intercept of all nine beaches around this global model.
+mod_ex4b <- lmer(Richness ~ NAP + (1|Beach),
+                 REML = FALSE, 
+                 data = RIKZ)
+
+```
+
+
+#### Solutions 4
 ```{r}
 # 4.1: Compare the summary output of the two models; what changes? Which one would you prefer and why?
 mod_ex4a <- lmer(Richness ~ NAP + (1|Exposure),
@@ -219,14 +267,21 @@ for(i in 1:length(unique(RIKZ$Beach))){
 
 
 
+### Exercise 5.1
 
-(1.1) Fit a mixed effect model on a subset of the RIKZ dataset, where you only include the observations with Exposure 10. Use Exposure as fixed effect, and Beach as random effect.
-```{r}
+Fit a mixed effect model on a subset of the RIKZ dataset, where you only include the observations with Exposure 10. Use Exposure as fixed effect, and Beach as random effect.
+
+#### Solution 5
+```{r, error=TRUE}
 # Solution
 mod_ex1 <- lmer(Richness ~ Exposure + (1 | Beach), REML = F, data = RIKZ[which(RIKZ$Exposure == 10), ])
 # The function throws an error, because there is only one level of the factor. 
 ```
-(1.1.b) Explain why the model threw an error.
+
+### Exercise 5.1.b
+Explain why the model threw an error.
+
+#### Solution 5.1.b
 ```{r}
 # Solution
 # because all levels of "Exposure" are the same, we do not need "Exposure" as factor in our model if all observations are from the same exposure.
@@ -234,13 +289,20 @@ mod_ex1b <- lmer(Richness ~ (1 | Beach), REML = F, data = RIKZ[which(RIKZ$Exposu
 summary(mod_ex1b)
 ```
 
+### Exercise 5.2
 (1.2) Fit a mixed effect model on a subset of the RIKZ dataset, where you only include the observations from Beach 6. Use Exposure as fixed effect, and Beach as random effect.
-```{r}
+
+#### Solution 5.2
+```{r, error=TRUE}
 # Solution
 mod_ex2 <- lmer(Richness ~ (1 | Beach), REML = F, data = RIKZ[which(RIKZ$Beach == 6), ])
 # again, we need more than 1 level in the random effect.
 ```
-(1.2.b) Fit a mixed effect model on a subset of the RIKZ dataset, where you only include the observations from Beach 6 and 1. Use Exposure as fixed effect, and Beach as random effect. Try to explain why you see what you see.
+
+### Exercise 5.2.b
+Fit a mixed effect model on a subset of the RIKZ dataset, where you only include the observations from Beach 6 and 1. Use Exposure as fixed effect, and Beach as random effect. Try to explain why you see what you see.
+
+#### Solution 5.2.b
 ```{r}
 # Solution
 mod_ex2 <- lmer(Richness ~ Exposure + (1 | Beach), REML = F, data = RIKZ[which(RIKZ$Beach %in% c(1,6)), ])
@@ -268,8 +330,10 @@ We validate our model based on the model assumptions that the **residuals are id
 
 Further, we can assess the general model fit by comparing the fitted (predicted) and observed values. (First step in below code.)
 
-*Exercise 4*: which of your models is the best model based on visual validation? How could you improve your model? What else can we consider when we validate our model?
+### Exercise 6
+which of your models is the best model based on visual validation? How could you improve your model? What else can we consider when we validate our model?
 
+#### Solution 6
 ```{r plot residuals against fitted, class.output = "scroll-200"}
 # Assessing global model fit
 plot(fitted(mod1), RIKZ$Richness)
@@ -301,7 +365,7 @@ qqline(ranef(mod2)$Beach[,1])
 
 
 
-
+## Model validation with simulation
 ```{r compare model simulated data with raw data, class.output = "scroll-200"}
 # simulate 1000 random samples with your model (based on model estimates)
 nsim=1000 
