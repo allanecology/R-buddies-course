@@ -2,8 +2,12 @@
 title: "Mixed model tutorial"
 author: "R buddies"
 date: "2023-03-29"
-output: html_document
+output: 
+  html_document:
+    number_sections: TRUE
+    theme: sandstone
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE)
