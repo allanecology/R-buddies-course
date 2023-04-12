@@ -2,7 +2,7 @@
 title: "Advanced Data Wrangling - Solutions"
 author: "N. Schenk"
 date: "2023-03-15"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -11,6 +11,41 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This Script contains the solutions to the tutorial about advanced data wrangling.
 
+### Requirements
+## Requirements
+
+**Packages**
+```{r, echo = T, message=FALSE}
+library(vegan) # for the example datasets
+library(ggplot2) # for plotting
+library(missForest) # adding missing data
+library(naniar) # to generate the missing values
+library(data.table) # a data wrangling package (similar to tidyverse)
+set.seed(0)
+```
+
+**Datasets** (Please consider the tutorial itself for explanations about the datasets)
+```{r}
+data(mite)
+data(varespec)
+data(varechem)
+varecomb <- data.frame("Pinusyl" = varespec[, c("Pinusylv")], varechem)
+varecomb_NA <- prodNA(varecomb, noNA = 0.1)
+mite_NA <- prodNA(mite, noNA = 0.1)
+mite_NA_small <- prodNA(mite, noNA = 0.001)
+# generate a dataset for practice purpose : 
+experimental_data_long <- data.table(plotname = paste0("plot", 1:50),
+           treatment = as.factor(c(rep("A", 10), c(rep("B", 10)), c(rep("C", 10)), c(rep("D", 10)), c(rep("E", 10)))),
+           subtreatment = as.factor(rep(rep(c("dry", "wet"), 5), 5)),
+           plantheight = c(rnorm(10, mean = 5, sd = 1), 
+                           rnorm(10, mean = 9, sd = 1),
+                           rnorm(10, mean = 4, sd = 1),
+                           rnorm(10, mean = 3.5, sd = 1),
+                           rnorm(10, mean = 8, sd = 1)))
+
+# create example dataset 2
+experimental_data_long_dup <- rbindlist(list(experimental_data_long, experimental_data_long[1, ]))
+```
 
 
 
@@ -38,10 +73,10 @@ specieswise_varespec <- data.frame(names = names(varespec),
 rownames(specieswise_varespec) <- NULL
 
 # plotting
-ggplot(specieswise_varespec, aes(x = names, y = specieswise_means)) +
+ggplot(specieswise_varespec, aes(x = names, y = specieswise_mean)) +
   geom_point() +
-  geom_errorbar(aes(ymin = specieswise_means - specieswise_sd, 
-                    ymax = specieswise_means + specieswise_sd)) +
+  geom_errorbar(aes(ymin = specieswise_mean - specieswise_sd, 
+                    ymax = specieswise_mean + specieswise_sd)) +
   coord_flip()
 #TODO : this plot still misses a nice title and nicer axis labels, and maybe some extras like colors? Would you feel to add this and send to us, so the tutorial gets nicer?
 ```
