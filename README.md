@@ -1,6 +1,10 @@
 # R-buddies-course
+
+### Spring semester 2023
+University of Bern course, improving programming habits, discussing programming and analysis skills and having a discussion about R!
+
 ### Fall semester 2022
-Unibe course, improving programming habits, discussing programming and analysis skills and having a discussion about R!
+University of Bern course, improving programming habits, discussing programming and analysis skills and having a discussion about R!
 
 ## Material for the course
 
