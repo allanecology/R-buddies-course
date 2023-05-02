@@ -58,7 +58,9 @@ In modelling, a parameter is fit to each level of a factor. In a fixed model, th
 * think of fixed and random (nested or crossed?) effects in your own study
 
 #### Solution 1
-...
+
+* a random effect in an experiment would be the grouping of pots in a tray, on which the same treatment is applied, and a random effect with a higher level would be the tables where you put the trays on. In this case we would have nested random effects: `(1|table/tray)`
+* a random effect in a field study could be regions or populations where you sampled individuals of your study species. If species is a random factor or not depends on the number of species included in your study (include them as random factors only if you have many species)
 
 
 ## Random and fixed effects
@@ -135,10 +137,50 @@ summary(mod3) # model including interactions: exposure and NAP are both signific
 # the model including only NAP gives a *** negative NAP effect (estimate= -2.57)
 # the linear model gives a *** negative NAP effect (estimate = -2.87)
 
+#### What might change if interactions are included?
+## main effects can become less significant or non significant.
+# see solution 4.3
+
 r.squaredGLMM(mod2)
 # including beach as random effect increases the R2 of the model (explained variance)
 
-# Check if things change if you use the restricted maximum likelihood method
+
+#### What might change depending on which Maximum likelihood method is used? 
+# The residual variance is slightly higher if we apply the restricted maximum likelihood method.
+# The models fitted with the restricted maximum likelihood method have a lower AIC
+
+# comment on the maximum likelihood method:
+# if models with different fixed effects structure are compared (this is what we normally do because we are interested in the fixed effects) we should apply ML estimation and not REML. Reason: the  REML likelihood depends on which fixed effects are in the model, and so are not comparable if the fixed effects change. REML is generally considered to give better estimates for the random effects, though, so the usual advice is to fit your best model using REML for your final inference and reporting.
+# source: https://stats.stackexchange.com/questions/116770/reml-or-ml-to-compare-two-mixed-effects-models-with-differing-fixed-effects-but
+
+ML.mod1 <- lmer(Richness ~ NAP
+             + (1|Beach), 
+             REML = FALSE, # maximum likelihood method (default is REML = T)
+             data = RIKZ)
+
+summary(ML.mod1) # residual variance of Beach: 9.11
+
+ML.mod2 <- lmer(Richness ~ Exposure # other fixed effect
+             + (1|Beach), 
+             REML = FALSE,
+             data = RIKZ)
+
+AIC(ML.mod1, ML.mod2) # compare models
+# 249 and 262
+
+REML.mod1 <- lmer(Richness ~ NAP
+             + (1|Beach), 
+             REML = TRUE, # restricted maximum likelihood method
+             data = RIKZ)
+
+summary(REML.mod1) # residual variance of Beach: 9.3
+
+REML.mod2 <- lmer(Richness ~ Exposure
+             + (1|Beach), 
+             REML = TRUE, # restricted maximum likelihood method
+             data = RIKZ)
+
+AIC(REML.mod1, REML.mod2) # 247 and 255
 
 
 ```
@@ -180,6 +222,7 @@ mod_ex4a <- lmer(Richness ~ NAP + (1|Exposure),
 mod_ex4b <- lmer(Richness ~ NAP + (1|Beach),
                  REML = FALSE, data = RIKZ)
 
+
 # 4.2: What happens with the effect of NAP in the following model and why? 
 
 mod_ex4c <- lmer(Richness ~ NAP + (1|Beach),
@@ -193,7 +236,6 @@ mod_ex4d <- lmer(Richness ~ NAP * Exposure + (1|Beach),
 
 mod_ex4e <- lmer(Richness ~ NAP + Exposure + (1|Beach),
                  REML = FALSE, data = RIKZ)
-
 
 
 # 4.4. Use the model used in Exercise 4.1 (mod_ex4b) using NAP as a fixed, and Beach as a random term. The mixed effect model with 
@@ -217,12 +259,15 @@ mod_ex4a <- lmer(Richness ~ NAP + (1|Exposure),
 mod_ex4b <- lmer(Richness ~ NAP + (1|Beach),
                  REML = FALSE, data = RIKZ)
 
+# 4.1 Solution: There is no big difference in the estimate of how NAP affects Richness (-2.7) and also not in the significance level. Also, the amount of variance explained by the random effect is similar. Residuals are +/- normally distributed independent of whether we include Beach or Exposure as random effect. However, I would prefer the model including Beach as random effect because we are not interested in the effect of beach, i.e there is no reason why we could expect a certain effect of beach in a certain direction on Richness. There are thousands of beaches and in this study we have a random sample of beaches, whereas for exposure we have pre-defined levels in which we are interested in. 
+
 # 4.2: What happens with the effect of NAP in the following model and why? 
 
 mod_ex4c <- lmer(Richness ~ NAP + (1|Beach),
                  REML = FALSE, 
                  data = RIKZ %>% group_by(Beach) %>% sample_frac(size = 1-0.59))
 
+# 4.2 Solution: the effect of NAP on Richness becomes less significant because we have a reduction in our degrees of freedom and hence lose statistical power.
 
 # 4.3: What happens with the effect of NAP depending on how NAP is fitted? 
 mod_ex4d <- lmer(Richness ~ NAP * Exposure + (1|Beach),
@@ -231,8 +276,8 @@ mod_ex4d <- lmer(Richness ~ NAP * Exposure + (1|Beach),
 mod_ex4e <- lmer(Richness ~ NAP + Exposure + (1|Beach),
                  REML = FALSE, data = RIKZ)
 
-# the slope of NAP decreases if the interaction with Exposure is removed from the model. But, also the std.error decreases
-# which model to choose? 
+# 4.3 Solution: If NAP is fitted without the interaction with Exposure, the slope of the effect decreased but the significance level increases. This model calculates the variance explained by NAP and by Exposure separately, whereas the first model takes into account that depending on the Exposure, the slope of the NAP effect is different. After accounting for the effect of the combinations of NAP and Exposure, a main effect of NAP is calculated. In general, there are several reasons why the main effect often becomes less significant if interactions are included: first, each of the interactions is an additional parameter that the model needs to evaluate, reducing the residual degrees of freedom. Second, the effect of a parameter might be different depending on the level of the second parameter (in different directions), with what the main effect becomes less significant. The main effect is then estimated as the average of the effects of the single levels of the parameter (which can be in different directions).
+# in general, I would always look at the raw data to decide whether or not to include an interaction.
 
 
 # 4.4. Use the model used in Exercise 4.1 (mod_ex4b) using NAP as a fixed, and Beach as a random term. The mixed effect model with 
