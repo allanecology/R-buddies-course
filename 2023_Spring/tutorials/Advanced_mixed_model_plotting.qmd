@@ -13,7 +13,7 @@ toc-title: Shortcuts
 editor: visual
 ---
 
-A common problem you might have encountered when plotting linear mixed models, is how to represent the confidence intervals whith or without random factor effects. There are two type of representations which might be useful for you.
+A common problem you might have encountered when plotting linear mixed models, is how to represent the confidence intervals with or without random factor effects. There are two type of representations which might be useful for you.
 
 **Disclaimer:** The major part of the code you will find in this tutorial comes from [here](https://deanmarchiori.rbind.io/post/prediction-intervals-for-linear-mixed-effects-models/).
 
@@ -71,7 +71,7 @@ ggplot(sleepstudy, aes(Days, Reaction)) +
 ```
 :::
 
-Until now, pretty easy. But that's ignoring the fact that we have differents subjects in this study, and the results might not be independent of the subject effect. What does each subject effect looks like ? Let's plot it.
+Until now, pretty easy. But that's ignoring the fact that we have different subjects in this study, and the results might not be independent of the subject effect. What does each subject effect looks like ? Let's plot it.
 
 ```{r}
 ggplot(sleepstudy, aes(Days, Reaction, col = Subject)) +
@@ -81,7 +81,7 @@ ggplot(sleepstudy, aes(Days, Reaction, col = Subject)) +
   theme_bw()
 ```
 
-As you can see, even if we are not interested by the subject effect, it might have a significant impact on our response variable. We can then treat it as a random factor in order to correct for this unwanted effect.
+As you can see, even if we are not interested in the subject effect, it might have a significant impact on our response variable. We can then treat it as a random factor in order to correct for this unwanted effect.
 
 ```{r}
 #| message: false

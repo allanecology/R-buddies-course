@@ -17,6 +17,7 @@ output: github_document
 
 - 14.20-15.10: work individually or in small groups
     - Exercise 1 and 2 (see last slide in attached file)
+    - Noelle : including everyone to our ILIAS folder who wants to get ECTS
 
 - 15.10 - 15.30: break
 
@@ -28,7 +29,53 @@ output: github_document
 
 - 16.45-17.00:
   - Who of you would like to get ECTS and would do a written/ oral summary?
+    - Did all of those register to the ILIAS folder?
   - find date for last session : Student presentations in week of 29th May - 2. June
       - Maja not here : Tuesday morning
   - find topic (I could prepare something on trait space visualization but only if students are interested in this topic)
+
+
+
+Fabienne : liebste fritti der 2. Juni, Di - Do Fäud
+Sara : alles ausser Mi Nami, Do vor 17:00 fertig si.
+
+25.05.23 08:15
+
+
+- tidyverse : data wrangling, R for data science
+- loops and functions, how 
+- Git tutorial
+
+
+
+Frage : ECTS?
+
+scale_fill_colourblind()
+
+
+
+
+# Discussion on graphs R buddy
+Date: 2.5.2023
+
+Why do we create graphs?
+* identify trends & relationships between variables
+* compare data
+* detect outliers
+* communicate results / transmit main messages
+* simplify things for an understanding of the data / results
+...
+
+What should we consider to plot meaningfully?
+* identify purpose of the graph (which message do we want to show?)
+* choose right chart type
+* keep it simple (not too many colors, avoid redundancy, not too much ink,
+  avoid 3d, ...)
+* labels, no abbreviations
+* include units
+* scale axes (so that all the data is included and fills the whole graph)
+...
+
+
+
 
