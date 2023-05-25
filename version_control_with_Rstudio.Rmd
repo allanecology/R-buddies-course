@@ -16,7 +16,7 @@ A collection of ressources to install version control, and to practice it's use.
 A Computer or Laptop where you have R and RStudio installed, and where you have the rights to install new software.
 
 ```{r}
-install.packages("usethis")
+# install.packages("usethis")
 library(usethis)
 ```
 
@@ -67,5 +67,14 @@ There are basically 2 solutions to this. One is rather a [workaround](https://gi
 
 
 
+# TODO
+
+- Nächstes Mal : eine Anleitung/ tutorial suchen, um git NUR locally zu haben.
+    während dem kurs war es verwirrend, weitere Tutorials zu suchen
+
+Probleme : 
+- user.name und user.email angeben (via konsole)
+- git.exe finden : Im Git bash properties schauen, wo pfad ist
+- Connect an existing project to GitHub (Eva)
 
 
