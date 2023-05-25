@@ -1,0 +1,237 @@
+---
+title: "R Buddy Club: General Additive Models (GAMs)"
+format: revealjs
+editor: visual
+---
+
+## Example data: HadCRUT4
+
+```{r hadcrut-temp-example, echo = FALSE}
+# Global historical surface temperature anomalies relative to a 1961-1990 reference period
+library('readr')
+library('dplyr')
+library(curl)
+library(ggplot2)
+## Load Data
+tmpf <- tempfile()
+curl_download("https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/time_series/HadCRUT.4.6.0.0.annual_nh.txt", tmpf)
+gtemp <- read.table(tmpf, colClasses = rep("numeric", 12))[, 1:2] # only want some of the variables
+names(gtemp) <- c("Year", "Temperature")
+gtemp <- as_tibble(gtemp)
+
+## Plot
+gtemp_plot <- ggplot(gtemp, aes(x = Year, y = Temperature)) +
+    geom_line() + 
+    geom_point() +
+    labs(title = "HadCRUT4", x = 'Year', y = expression(Temperature ~ degree*C)) +
+  theme_classic()
+
+gtemp_plot
+```
+
+^~https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/time_series/HadCRUT.4.6.0.0.annual_nh.txt~^
+
+## Some data is not linear
+
+```{r}
+library(ggplot2)
+library(ggpubr)
+
+
+gtemp2 <- gtemp_plot +  geom_point(alpha=.5, colour = "black") +
+  stat_smooth(method="glm", se=FALSE, method.args = list(), color = "#D53E4F") +
+  labs(title = "GLM", x = 'Year', y = expression(Temperature ~ degree*C))+
+  theme_classic()
+
+glm_gtemp <- ggplot(gtemp, aes(x=Year, y = Temperature)) +
+  geom_point(alpha=.5, colour = "black") +
+  stat_smooth(method="glm", se=FALSE, method.args = list(), color = "#D53E4F") +
+  labs(x = 'Year', y = expression(Temperature ~ degree*C))+
+  theme_classic()
+
+ggarrange(gtemp_plot, gtemp2, ncol=2)
+```
+
+^~https://github.com/eco4cast/Statistical-Methods-Seminar-Series/tree/main/simpson-gams~^
+
+## Polynomials
+
+```{r}
+library(wesanderson)
+library(paletteer)
+library(dplyr)
+library(tidyr)
+p <- c(1,3,8,15)
+N <- 300
+newd <- with(gtemp, data.frame(Year = seq(min(Year), max(Year), length = N)))
+polyFun <- function(i, data = data) {
+  lm(Temperature ~ poly(Year, degree = i), data = data)
+}
+mods <- lapply(p, polyFun, data = gtemp)
+pred <- vapply(mods, predict, numeric(N), newdata = newd)
+colnames(pred) <- p
+newd <- cbind(newd, pred)
+polyDat <- gather(newd, Degree, Fitted, -Year)
+polyDat <- mutate(polyDat, Degree = ordered(Degree, levels = p))
+gtemp_plot + geom_line(
+  data = polyDat, mapping = aes(x = Year, y = Fitted, colour = Degree),
+  size = 1, alpha = 0.9
+) +
+  scale_color_brewer(name = "Degree", palette = "Spectral") +
+# theme(legend.position = "right") +
+  theme_classic()
+
+```
+
+## Fitted GAM
+
+```{r}
+library("mgcv")
+m <- gam(Temperature ~ s(Year), data = gtemp, method = "REML")
+summary(m)
+gam.check(m)
+
+N <- 300
+newd <- as_tibble(with(gtemp, data.frame(Year = seq(min(Year), max(Year), length = N))))
+pred <- as_tibble(as.data.frame(predict(m,
+  newdata = newd, se.fit = TRUE,
+  unconditional = TRUE
+)))
+pred <- bind_cols(newd, pred) %>%
+  mutate(upr = fit + 2 * se.fit, lwr = fit - 2 * se.fit)
+
+ggplot(gtemp, aes(x = Year, y = Temperature)) +
+  geom_point() +
+  geom_ribbon(
+    data = pred,
+    mapping = aes(ymin = lwr, ymax = upr, x = Year), alpha = 0.4, inherit.aes = FALSE,
+    fill = "#FDAE61"
+  ) +
+  geom_line(
+    data = pred,
+    mapping = aes(y = fit, x = Year), inherit.aes = FALSE, size = 1, colour = "purple1"
+  ) +
+  labs(x = "Year", y = expression(Temeprature ~ degree * C)) +
+  theme_classic()
+
+```
+
+## General Additive Models
+
+-   **gam(y \~ s(x), data = data)**
+
+    -   y: response variable (temperature)
+
+    -   x: covariate (year)
+
+    -   covariate in smooth function s() (spline)
+
+```         
+library('mgcv')
+model <- gam(Temperature ~ s(Year), data = gtemp, method = 'REML')
+```
+
+## How GAMs work
+
+::: columns
+::: {.column width="50%"}
+![](images/newplot(2).png){width="510"}
+
+![](images/Bildschirmfoto%20vom%202023-05-24%2012-37-41.png){width="310" height="71"}
+:::
+
+::: {.column width="50%"}
+![](images/newplot-01.png){width="329"}
+
+![](images/newplot(1)-01.png){width="330"}
+:::
+
+^~https://towardsdatascience.com/generalised-additive-models-6dfbedf1350a~^
+:::
+
+## Wiggliness and Over-fitting
+
+![](images/Bildschirmfoto%20vom%202023-05-24%2012-37-51.png){width="197"}
+
+::: columns
+::: {.column width="50%"}
+```         
+gam(Temperature ~ s(Year, k = 3), data = gtemp)
+```
+
+```{r}
+low_k <- gam(Temperature ~ s(Year, k = 3), data = gtemp, method = "REML")
+# summary(m)
+# gam.check(m)
+
+N <- 300
+newd_low <- as_tibble(with(gtemp, data.frame(Year = seq(min(Year), max(Year), length = N))))
+pred_low <- as_tibble(as.data.frame(predict(low_k,
+  newdata = newd_low, se.fit = TRUE,
+  unconditional = TRUE
+)))
+pred_low <- bind_cols(newd_low, pred_low) %>%
+  mutate(upr = fit + 2 * se.fit, lwr = fit - 2 * se.fit)
+
+wiggle_2 <- ggplot(gtemp, aes(x = Year, y = Temperature)) +
+  geom_point() +
+  geom_ribbon(
+    data = pred_low,
+    mapping = aes(ymin = lwr, ymax = upr, x = Year), alpha = 0.4, inherit.aes = FALSE,
+    fill = "#FDAE61"
+  ) +
+  geom_line(
+    data = pred_low,
+    mapping = aes(y = fit, x = Year), inherit.aes = FALSE, size = 1, colour = "purple1"
+  ) +
+  labs(x = "Year", y = expression(Temeprature ~ degree * C)) +
+  theme_classic()
+
+
+wiggle_2
+```
+:::
+
+::: {.column width="50%"}
+```         
+gam(Temperature ~ s(Year, k = 60), data = gtemp)
+```
+
+```{r}
+wiggly_1 <- gam(Temperature ~ s(Year, k = 60), data = gtemp, method = "REML")
+# summary(m)
+# gam.check(m)
+
+N <- 300
+newd_wi_1 <- as_tibble(with(gtemp, data.frame(Year = seq(min(Year), max(Year), length = N))))
+pred_wi_1 <- as_tibble(as.data.frame(predict(wiggly_1,
+  newdata = newd_wi_1, se.fit = TRUE,
+  unconditional = TRUE
+)))
+pred_wi_1 <- bind_cols(newd_wi_1, pred_wi_1) %>%
+  mutate(upr = fit + 2 * se.fit, lwr = fit - 2 * se.fit)
+
+wiggle1 <- ggplot(gtemp, aes(x = Year, y = Temperature)) +
+  geom_point() +
+  geom_ribbon(
+    data = pred_wi_1,
+    mapping = aes(ymin = lwr, ymax = upr, x = Year), alpha = 0.4, inherit.aes = FALSE,
+    fill = "#FDAE61"
+  ) +
+  geom_line(
+    data = pred_wi_1,
+    mapping = aes(y = fit, x = Year), inherit.aes = FALSE, size = 1, colour = "purple1"
+  ) +
+  labs(x = "Year", y = expression(Temeprature ~ degree * C)) +
+  theme_classic()
+
+wiggle1
+```
+:::
+:::
+
+## Thanks for you attention!
+
+![](images/memecoders-997156735.jpeg){fig-align="center"}
+
+^~https://i1.wp.com/cleus.co/wp-content/uploads/2019/03/memecoders.jpg?resize=1058%2C959&ssl=1~^
