@@ -16,7 +16,7 @@ A collection of ressources to install version control, and to practice it's use.
 A Computer or Laptop where you have R and RStudio installed, and where you have the rights to install new software.
 
 ```{r}
-# install.packages("usethis")
+install.packages("usethis")
 library(usethis)
 ```
 
@@ -24,26 +24,179 @@ library(usethis)
 
 # Part 1 : Install version control
 
-## Install git
-
-Try to set up git and connect it to RStudio. For this, follow the instructions under point 6 in [this](https://happygitwithr.com/install-git.html) tutorial.
-
 If you run into problems, consider the Frequently Asked Questions (FAQ) section of this documents and feel free to ask.
 
+## Install git
+
+For this, follow the instructions under point 6 in [this](https://happygitwithr.com/install-git.html) tutorial.
+
+Note that you do not get an installation confirmation. You will know that git is installed, when you are able to run the commands in the point below.
 
 ## Configure git
 
-Configure git on your PC/ Laptop. Follow the instructions under point 7 in [this](https://happygitwithr.com/install-git.html) tutorial (same as above). Please *note* : You do not need a GitHub account to follow this tutorial! The instructions just want to point out that IF you consider a GitHub account, you should use the email address you WOULD USE for this GitHub account in your configuration file.
+Configure git on your PC/ Laptop. Please *note* : You do not need a GitHub account to follow this tutorial! The instructions just want to point out that IF you consider a GitHub account, you should use the email address you WOULD USE for this GitHub account in your configuration file.
 
-Under Point 7.1.2, please use the word "main" as default name for initial branch.
+```{r}
+# from the package usethis
+# please fill in your own name and email
+use_git_config(user.name = "Jane Doe", user.email = "jane@example.org")
+
+# if you want, you can double check the name and email using :
+gert::git_config()
+```
+
+Alternatively, you can follow the instructions under point 7 in [this](https://happygitwithr.com/install-git.html) tutorial (same as above). Under Point 7.1.2, please use the word "main" as default name for initial branch.
+
+
+## Connect git and RStudio
+
+From within RStudio : 
+
+- File > New Project
+- chose "New Directory"
+- chose "New Project"
+- type directory name "test_project_helpdesk_workshop"
+    inspect the directory : is it where you want to have the folder in your file system? (e.g. in Documents/github/) If not, chose the place you would like to have the directory. It's possible to change later, but not free of problems.
+    check the box "Create a git repository"
+    facultatively check the box "Use renv* with this project" (if you don't know, you can still activate later)
+- click "Create Project"
+
+*Note*: *renv is a package which allows you to save a snapshot of all the packages you are using in your project. It is recommended for a reporoducible workflow.
+
+
+Now, you should see an additional tab named "Git" in your RStudio. When you open the tab, you will see a list of files, with yellow questionmarks in front of them. One is called ".gitignore" and the other is called "test_project_helpdesk_workshop.Rproj".
+
+
+## Exercise 1 : your first commit
+
+- create a file : "example.R" Copy the content below to this file
+```{r}
+########################################
+#                                      #
+# example file for helpdesk workshop   #
+#                                      #
+########################################
+# created by Noelle Schenk 09.02.2021
+# purpose : example of creating Rproject
+```
+
+- save the file
+- Additional : From within your file system, go to the project folder and see that the file appears there as well.
+
+- we want to tell version control that it should have a look at our file "example.R"
+  Therefore, we save the changes we made to the file. We just created it, so the main change to before is, that we just made a new file with a header. The file changed from not existing to existing and containing a few lines.
+- open the "Git" Tab on the upper right corner
+- check the box for "example.R"
+  - now we selected the changes made to example.R to be saved to version control.
+  - but of corse, we would like to see how these changes look...
+- click "Commit"
+  - a popup window opens
+  - you see 3 parts of the window : 
+    - one looks exactly like the window in RStudio before, with the 3 files that we can select.
+    - one says "Commit message" and looks quite empty
+    - one shows the "diff" (where it is green)
+      a "diff" is a file that shows changes made to a file.
+      everything we added newly appears green, everything we deleted appears red.
+      Here, we created the file newly, so we added everything. Therefore, all is green.
+  - the next step is to comment our changes. Every time we change something, we quickly comment what we changed, so later it will be possible to find specific changes to the file.
+    This is called a "Commit"
+    We therefore write a so-called "Commit message" to the window. Copy paste the following text : 
+    "created file example.R and added header"
+- Then click commit, to save the commit message and the changes made to the file.
+- Close and exit
+
+Congratulations! You just made your first commit!
+
+
+## Exercise 2 : your second commit
+
+- now we want to change something on the file and see how this can be committed :
+- add some changes to the file
+```{r}
+x <- seq(0, 1, 0.0001)
+y <- rnorm(x)
+plot(x, y)
+```
+
+- save the changes
+- now we also want to tell version control that the changes should be saved :
+  look at the upper right window. Something changed : the two files .gitignore and .Rproj are unchanged, they have yellow questionmarks next to them. But the file "example.R" has a blue "M" next to it now.
+  "M" stands for "modified", because git has detected that we have modified the file - we added some lines to it.
+- To save the changes, check the box next to "example.R"
+- Click Commit
+- The popup opens again.
+  - diff : Now, not the whole file is green any more, but just the part that we added. The upper part is white, because there have not been any changes to it.
+- write a commit message "plotted sample from a normal distribution"
+- Commit
+- Close and exit
+
+Congratulations, you just made your second commit!
+
+Do you see the workflow?
+
+You always make a change, check the box, click Commit, look at the diff, write a commit message and commit. Then you leave the window and make a new change, ...
+
+
+## Exercise 3 : your third commit
+
+- play it with an example : 
+- make a change `hist(x, y)`
+- check the box, click commit, write a commit message `changed plot to histogram of sample from normal distribution`, commit, leave the window
+
+- now, your turn : 
+    - delete a part of your script and commit
+    - add something new and commit
+
+
+## Checking the history
+
+- Okay, now we have made some changes and we can look at the history of the file.
+- make a change to the file ` `
+- Click the "Git" Tab, check the box, click "Commit"
+  Now you would normally look at the diff and write a commit message.
+  This time, we want to look at the history of the file.
+- Click the "History" Tab
+- upper and lower part :
+  - upper part : a list with the changes made, the Author, date, a name of the change given by the machine (SHA) and the commit message under "Subject".
+  - remember the commit messages.
+  - if you want to look at a given version, click on it.
+    - look at the diffs
+  - revert to the original version:
+    - select the oldest version
+    - view file (the version of the file has a special name.)
+    - "save as" under the original name, Replace the old with this.
+      This will keep the whole history of the file, you don't have to worry about losing previous changes.
+      commit message (if possible) : `reverted to original`
+    - add minimal change ` `, commit, look at history and show that everything is still there.
+
+
+### Additional
+
+- save **milestone** version : put MILESTONE or STABLE VERSION or similar to your commit message, so you will find it more easy within your history.
+  Fix one way of naming milestone versions and always use the same, there is no default - you have to chose a way of doing it.
+
+- about .gitignore and *.Rproj
+  - easy fix : just commit them together with a commit message
+
+- do that, commit message is `Rproject files`
+
+- The .gitignore contains names of files that git should ignore, that means that are not part of the version control
+  Git is only for script, not for any formatted file like word or excel files. The diff file can not be generated on a word or excel file, therefore it does not make sense to use git on them.
+
+You can just ignore the files in your window, or you ignore them (Check them and chose ignore in the settings dropdown menu)
+    - create empty excel file, ignore it.
+    - commit .gitignore file `ignore excel file`
 
 
 
-## Connect git and RStudio to GitHub
+
+## Connect to GitHub
 
 Try to connect git and RStudio to GitHub following points 4 (only if you want GitHub) and 8 (everyone) [this](https://happygitwithr.com/install-git.html) tutorial (same as above):  (points 4 and 8 in the tutorial)
 
 If you run into problems, consider the Frequently Asked Questions (FAQ) section of this documents and feel free to ask.
+
+
 
 
 
