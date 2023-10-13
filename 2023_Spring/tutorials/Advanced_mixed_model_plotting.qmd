@@ -71,7 +71,7 @@ ggplot(sleepstudy, aes(Days, Reaction)) +
 ```
 :::
 
-Until now, pretty easy. But that's ignoring the fact that we have differents subjects in this study, and the results might not be independent of the subject effect. What does each subject effect looks like ? Let's plot it.
+Until now, pretty easy. But that's ignoring the fact that we have different subjects in this study, and the results might not be independent of the subject effect. What does each subject effect looks like ? Let's plot it.
 
 ```{r}
 ggplot(sleepstudy, aes(Days, Reaction, col = Subject)) +

@@ -234,7 +234,7 @@ F-statistic: 71.46 on 1 and 178 DF,  p-value: 9.894e-15</code></pre>
 </div>
 </div>
 </div>
-<p>Until now, pretty easy. But that’s ignoring the fact that we have differents subjects in this study, and the results might not be independent of the subject effect. What does each subject effect looks like ? Let’s plot it.</p>
+<p>Until now, pretty easy. But that’s ignoring the fact that we have different subjects in this study, and the results might not be independent of the subject effect. What does each subject effect looks like ? Let’s plot it.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(sleepstudy, <span class="fu">aes</span>(Days, Reaction, <span class="at">col =</span> Subject)) <span class="sc">+</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
