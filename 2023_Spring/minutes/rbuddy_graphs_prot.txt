@@ -1,0 +1,64 @@
+Discussion on graphs R buddy
+Date: 2.5.2023
+
+Next date: 25. Mai 8.15 - 11.15
+topics ideas: 
+* tidyverse: how to merge, subset, make new columns etc
+* loops and how to avoid loops
+* version control on git
+
+--> we take version control
+
+Students present: Zephir, Sara Hoefer, Sarah Gauss, Tatjana, Sophie
+
+Why do we create graphs?
+* identify trends & relationships between variables, get an overview
+* compare data
+* detect outliers (boxplots, scatterplots with plot-function in base R, cooks distance) - if you kick outliers out, give reasons (biological reason?)
+* communicate results / transmit main messages
+* simplify things for an understanding of the data / results
+* communicate results, make them accessible for other people, non-researchers
+
+What should we consider to plot meaningfully?
+* identify purpose of the graph (which message do we want to show?)
+* choose right chart type
+* inclusive color palette (e.g R-charts.com/colors -> there you can just copy it)
+* keep it simple (not too many colors, avoid redundancy, not too much ink,
+  avoid 3d, ...)
+* labels, no abbreviations
+* include units
+* scale axes (so that all the data is included and fills the whole graph)
+...
+
+Bad graphs:
+* shrinking family doctor: they want to show that there is a decreasing doctor/population
+ratio over time...time scale is misleading (not continuous), .. size of doctors irritates
+* new york state total budget: 3d confusing, too much ink
+* SD elevation (abbreviation), Richness of what? .. I would use colors instead of different
+shapes because I can't distinguish them.. over all / main relationship / trendline?
+* axes labels: for factors I would directly indicate the meaning and not zero/one (here e.g protected/non-protected)
+... right plot: why are blue dots not labeled - why not all red dots labeled? difficult to see to which dot which label belongs
+.... ugly
+* Distribution of AM fungi: too many abbreviations, no over all trend detectable, too much information
+... personally I have always difficulties with continuous color palettes; here I would prefer to have
+three levels of abundances and occurrences... otherwise I'm confused because there are too many details.. i would
+put the details in a table so that the ones who are interested can have a look
+* LUI: too many variables! I can not see the relationships between the single variables in the middle and the cate
+gories on the left. No one except us understands LUI
+* Root functional traits; too many abbreviations on y-axes. 
+* Relationships btw community dissimilarities: can't identify the shapes
+... abbreviations are not even described in the capture
+* What about this one? I like the drawings but I have difficulties with understanding the brown circles...
+.. CWM, do all understand this? ... main message not clear, too complex
+
+
+Comments on Exercise 1 and 2:
+* transpose data: pivot function from tidyverse, verry useful (pivot_longer or pivot_wider). You can define new columns and say which variables 
+should be in rows or columns. for the iris dataset code example: see R Markdown file from this R buddy session
+
+* save plot with e.g ggsave() from cowplot package -> save plot with ggsave function (or another function) allows
+to fully reproduce the plot, also if data has changed (in contrast to manually extract a pdf of the plot)
+* sjplot also has a save function where you can adjust the single plot sizes
+* ggeffects package and sjplot packages useful to plot model estimates and summary stats tables
+* "wesanderson" package for special colors
+* how to insert p-values and stars: check ggplot tutorial

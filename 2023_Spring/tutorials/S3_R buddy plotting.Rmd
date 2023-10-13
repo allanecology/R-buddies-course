@@ -1,0 +1,213 @@
+---
+title: "Plotting R buddy exercises"
+author: "R buddies"
+date: "2023-04-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# packages
+```{r packages}
+library(ggplot2)
+library(cowplot)
+library(RColorBrewer)
+library(ggpubr)
+library(grid)
+library(nlme)
+library(lme4)
+library(sjPlot)
+library(ggeffects)
+```
+
+# Data
+```{r load data}
+#### load your own data
+
+#### load iris data
+data("iris")
+str(iris)
+
+#### load RIKZ data
+# AED is the package accompanying the Book from Zuur et al.
+# install.packages("remotes")
+# remotes::install_github("romunov/AED")
+library(AED)
+data("RIKZ")
+```
+
+# Ex 1: improve this ugly plot (with ggplot2)
+```{r base R plots}
+# plot multiple traits for the three species
+levels(iris$Species)
+
+
+# ugly plots
+par(mfrow=c(3,4)) 
+boxplot(iris[iris$Species=="setosa", ]$Sepal.Length,
+        main = "I. setosa",
+        ylab = "SL",
+        col = "red")
+boxplot(iris[iris$Species=="setosa", ]$Sepal.Width,
+        main = "I. setosa",
+        ylab = "SW",
+        col = "red")
+boxplot(iris[iris$Species=="setosa", ]$Petal.Length,
+        main = "I. setosa",
+        ylab = "PL",
+        col = "red")
+boxplot(iris[iris$Species=="setosa", ]$Petal.Width,
+        main = "I. setosa",
+        ylab = "PW",
+        col = "red")
+boxplot(iris[iris$Species=="versicolor", ]$Sepal.Length,
+        main = "I. versicolor",
+        ylab = "SL",
+        col = "green")
+boxplot(iris[iris$Species=="versicolor", ]$Sepal.Width,
+        main = "I. versicolor",
+        ylab = "SW",
+        col = "green")
+boxplot(iris[iris$Species=="versicolor", ]$Petal.Length,
+        main = "I. versicolor",
+        ylab = "PL",
+        col = "green")
+boxplot(iris[iris$Species=="versicolor", ]$Petal.Width,
+        main = "I. versicolor",
+        ylab = "PW",
+        col = "green")
+boxplot(iris[iris$Species=="virginica", ]$Sepal.Length,
+        main = "I. virginica",
+        ylab = "SL",
+        col = "yellow")
+boxplot(iris[iris$Species=="virginica", ]$Sepal.Width,
+        main = "I. virginica",
+        ylab = "SW",
+        col = "yellow")
+boxplot(iris[iris$Species=="virginica", ]$Petal.Length,
+        main = "I. virginica",
+        ylab = "PL",
+        col = "yellow")
+boxplot(iris[iris$Species=="virginica", ]$Petal.Width,
+        main = "I. virginica",
+        ylab = "PW",
+        col = "yellow")
+
+```
+```{r solution improved plot with ggplot}
+safe_colorblind_palette <- c("#88CCEE", "#CC6677", "#DDCC77", "#117733", "#332288", "#AA4499", 
+                             "#44AA99", "#999933", "#882255", "#661100", "#6699CC", "#888888")
+                             
+my.colors <- c("#88CCEE", "#DDCC77", "#AA4499")
+
+my_theme <-  theme_cowplot() +
+  theme(axis.title.x = element_blank(),
+       axis.text.x = element_blank(),
+       axis.ticks.x = element_blank())
+
+plot.SL <- ggplot(data = iris) +
+  aes(x = Species, y = Sepal.Length, color = Species) +
+  geom_boxplot() +
+  geom_jitter(position = position_jitter(0.2))  +
+  scale_color_manual(labels = c("I. setosa", "I. versicolor", "I. virginica"), 
+                     values = my.colors) +
+  labs(y = "Sepal length [cm]") +
+  my_theme
+
+plot.SW <- ggplot(data = iris) +
+  aes(x = Species, y = Sepal.Width, color = Species) +
+  geom_boxplot() +
+  geom_jitter(position = position_jitter(0.2)) +
+  scale_color_manual(labels = c("I. setosa", "I. versicolor", "I. virginica"), 
+                     values = my.colors) +
+  labs(y = "Sepal width [cm]") +
+  my_theme
+
+plot.PL <- ggplot(data = iris) +
+  aes(x = Species, y = Petal.Length, color = Species) +
+  geom_boxplot() +
+  geom_jitter(position = position_jitter(0.2))  +
+  scale_color_manual(labels = c("I. setosa", "I. versicolor", "I. virginica"), 
+                     values = my.colors) +
+  labs(y = "Petal length [cm]") +
+  my_theme
+
+plot.PW <- ggplot(data = iris) +
+  aes(x = Species, y = Petal.Width, color = Species) +
+  geom_boxplot() +
+  geom_jitter(position = position_jitter(0.2))  +
+  scale_color_manual(labels = c("I. setosa", "I. versicolor", "I. virginica"), 
+                     values = my.colors) +
+  labs(y = "Petal width [cm]") +
+  my_theme
+
+ggarrange(plot.SL, plot.SW, plot.PL, plot.PW,
+          ncol = 2,
+          nrow = 2,
+          common.legend = T,
+          legend = "right")
+
+# extra task: change legend text; species names are normally written in italic
+
+### of course there are many possibilities how the ugly plot can be improved! Also, this code is probably not the shortest for this purpose.
+```
+
+
+# plot model effects with sjPlot package
+```{r}
+# Here's a very comprehensive guide to plotting with the plot_model function:
+  # https://strengejacke.github.io/sjPlot/articles/plot_marginal_effects.html
+
+# Now you! :)
+
+# 1 - create a linear model with your own data, iris or RIKZ
+
+# 2 - use plot_model function to plot your graph
+some_model <- plot_model(fit, type="pred", terms= c("variable 1"), 
+                         axis.title = c("variable 1","response variable"), 
+                         title = "title", dot.size=  show.data = T)
+
+# 3 - you can also save your graph:
+sjPlot::save_plot("name.png", some_model, width = 12, axis.titlesize = 0.8, 
+                  legend.textsize = 0.7, legend.itemsize = 0.7,
+                  legend.titlesize = 0.8)
+
+# 4 - and extract a nice stats table for your model
+tab_model(fit, show.aic = T, title = "", wrap.labels = 100, show.se = T, 
+          p.style = "numeric_stars")
+  # or for instance with "jtools" (https://jtools.jacob-long.com/articles/summ.html)
+
+#Both the graph and the stats table are customizable to a certain level, feel free to work out their limitations!
+```
+
+# plot model effects with ggeffects package
+```{r}
+# helpful introduction to the ggeffects package:
+  # https://strengejacke.github.io/ggeffects/
+
+# even more helpful introduction to customizing plots created with ggeffects package:
+  # https://strengejacke.github.io/ggeffects/articles/introduction_plotcustomize.html
+
+# Try it yourself!
+
+# fit a linear model to the dataset
+model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
+
+# compute marginal effects
+marginal_effects <- ggeffect(model, terms = "Sepal.Width")
+
+# convert the marginal effects to a data frame
+marginal_effects_df <- as.data.frame(marginal_effects)
+
+# plot the marginal effects with ggplot()
+ggplot(marginal_effects_df, aes(x = x, y = predicted)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2) +
+  xlab("Sepal.Width") +
+  ylab("Predicted Sepal.Length") +
+  ggtitle("Titel")
+
+```
+
