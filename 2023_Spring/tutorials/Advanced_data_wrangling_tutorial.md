@@ -75,6 +75,8 @@ mite_NA_small <- prodNA(mite, noNA = 0.001) # remove a small fraction of values
 help(apply)
 ```
 
+    ## starting httpd help server ... done
+
 `apply()` is a very versatile function, used to apply (execute) a given
 R function on each column OR on each row of a data.frame. It is useful
 in situation where you would like to execute the same function
@@ -242,11 +244,6 @@ with package `naniar` or by hand
 # with package naniar
 vis_miss(mite_NA)
 ```
-
-    ## Warning: `gather_()` was deprecated in tidyr 1.2.0.
-    ## ℹ Please use `gather()` instead.
-    ## ℹ The deprecated feature was likely used in the visdat package.
-    ##   Please report the issue at <]8;;https://github.com/ropensci/visdat/issueshttps://github.com/ropensci/visdat/issues]8;;>.
 
 ![](Advanced_data_wrangling_tutorial_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
@@ -467,7 +464,7 @@ table(na.omit(experimental_dataNA)$treatment)
 
     ## 
     ## A B 
-    ## 7 3
+    ## 7 4
 
 In this example, it is easy to spot that the experimental design is
 unbalanced. But in larger, more complex datasets, it can be harder.
