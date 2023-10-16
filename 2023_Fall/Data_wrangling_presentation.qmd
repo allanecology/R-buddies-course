@@ -1,0 +1,185 @@
+---
+title: "Introduction to data wrangling"
+author: "Caroline"
+date: 10-17-2023
+format: 
+  revealjs:
+    auto-animate: true
+    theme: serif
+    show-slide-number: all
+    auto-animate-easing: ease-in-out
+    auto-animate-unmatched: true
+editor: visual
+---
+
+## What is data wrangling?
+
+::: columns
+![](pictures/pic1.gif){fig-align="center"}
+:::
+
+## What is data wrangling? {auto-animate="true"}
+
+### Definition:
+
+> "Tidy datasets are all alike but every messy dataset is messy in its own way." --- Hadley Wickham
+
+## What is data wrangling? {auto-animate="true"}
+
+### Definition:
+
+> "Tidy datasets are all alike but every messy dataset is messy in its own way." --- Hadley Wickham
+
+> "Data wrangling is the process of converting raw data into a usable form" --- A very serious website
+
+## Why is it so difficult? {auto-animate="true"}
+
+## Why is it so difficult? {auto-animate="true"}
+
+-   Lot of efforts
+
+## Why is it so difficult? {auto-animate="true"}
+
+-   Lot of efforts
+-   Small rewards
+
+## Why is it so difficult? {auto-animate="true"}
+
+-   Lot of efforts
+-   Small rewards
+-   Many different ways to do the same thing
+
+## Why is it so difficult? {auto-animate="true"}
+
+-   Lot of efforts
+-   Small rewards
+-   Many different ways to do the same thing
+
+::: columns
+![](pictures/cat1.png){fig-align="center"}
+:::
+
+## Where to start? {auto-animate="true"}
+
+-   useful packages
+    -   tidyr
+    -   data-table
+
+## Where to start? {auto-animate="true"}
+
+-   useful packages
+    -   tidyr
+    -   data-table
+-   "as-you-go" method
+
+## Where to start? {auto-animate="true"}
+
+-   useful packages
+    -   tidyr
+    -   data-table
+-   "as-you-go" method
+
+Whatever method you prefer, there are still similar steps that will help you get the data format of your dreams
+
+## Step 1: read the data {auto-animate="true"}
+
+## Step 1: read the data {auto-animate="true"}
+
+Seems simple but sometimes it's not.
+
+## Step 1: read the data {auto-animate="true"}
+
+Seems simple but sometimes it's not.
+
+With R, you can read different file extensions, the most common being:
+
+-   .txt
+-   .xlsx
+
+## Step 2: look at your data {auto-animate="true"}
+
+## Step 2: look at your data {auto-animate="true"}
+
+More precisely, looking at which type of data you have compared to what you want.
+
+For this, the function <code>str()</code> will be your friend
+
+## Step 2: look at your data {auto-animate="true"}
+
+More precisely, looking at which type of data you have compared to what you want.
+
+For this, the function <code>str()</code> will be your friend
+
+It's important to have some kind of idea of the type of data that you want to get (how many rows, how many columns, etc.)
+
+## Step 3: start with the ID columns {auto-animate="true"}
+
+What is an ID column ?
+
+## Step 3: start with the ID columns {auto-animate="true"}
+
+What is an ID column ?
+
+It's a column that identifies your samples: Plot, Block, Reference, etc.
+
+You want to start with those because they will be needed in order to summarise you data later, for example, you might want to calculate the mean of biomass production per season.
+
+## Step 3: start with the ID columns {auto-animate="true"}
+
+What is an ID column ?
+
+It's a column that identifies your samples: Plot, Block, Reference, etc.
+
+You want to start with those because they will be needed in order to summarise you data later, for example, you might want to calculate the mean of biomass production per season.
+
+**Check for typos!!** Use the function <code>unique()</code> or <code>levels()</code> (if it's a factor)
+
+## Step 4: Check for NAs and decide what to do with them {auto-animate="true"}
+
+You can use the function <code>is.na()</code> in order to explore your variables and check for eventual missing data.
+
+## Step 4: Check for NAs and decide what to do with them {auto-animate="true"}
+
+You can use the function <code>is.na()</code> in order to explore your variables and check for eventual missing data.
+
+Then you need to decide, <code>na.omit()</code> or not <code>na.omit()</code> ?
+
+## Step 5: The forbidden loop {auto-animate="true"}
+
+Making a loop is wrong!
+
+::: columns
+![](pictures/pic2.png){fig-align="center"}
+:::
+
+## Step 5: The forbidden loop {auto-animate="true"}
+
+Making a loop is wrong!
+
+... You can still use them (sometimes).
+
+## Step 6: plotting helps {auto-animate="true"}
+
+When in doubt, plot!
+
+```{r}
+library(ggplot2)
+data<-read.table("example_data_to_clean2.txt", sep="\t", header = T)
+ggplot(data, aes(x = x, y = y)) +
+geom_point(pch = "circle", color = "red", size = 2) +
+theme_bw() +
+theme(legend.position = "none") 
+```
+
+## Step 7: Exercise {auto-animate="true"}
+
+Now, time for a small exercise!
+
+```{r, echo=TRUE, eval=FALSE}
+library(ggplot2)
+data<-read.table("example_data_to_clean.txt", sep="\t", header = T)
+ggplot(data, aes(x = x, y = y)) +
+geom_point(pch = "circle", color = "red", size = 2) +
+theme_bw() +
+theme(legend.position = "none") 
+```

@@ -1,0 +1,56 @@
+
+What did I do when I created the fake data set ?
+
+```{r, warning=F}
+library(devtools)
+library(datasauRus)
+library(data.table)
+library(tidyverse)
+library(ggplot2)
+
+devtools::install_github("jumpingrivers/datasauRus")
+
+data<-data.table(datasaurus_dozen)
+subdata<-data.table(datasaurus_dozen)[dataset=="dino"|dataset=="x_shape"|dataset=="star"|dataset=="v_lines"]
+
+subdata <- subdata %>%
+  mutate(category= case_when(dataset == "dino" ~ 1,
+                             dataset == "x_shape" ~ 2,
+                             dataset == "star" ~ 3,
+                             dataset == "v_lines" ~ 4))
+subdata$category<-as.character(subdata$category)
+
+subdata[14,]$category<-"one"
+subdata[123,]$category<-"One"
+
+subdata$x<-as.character(subdata$x)
+
+subdata[264,]$category<-NA
+
+which(is.na(subdata$category))
+
+fake_data<-data.frame(x=runif(40, min = min(as.numeric(subdata$x)), max = max(as.numeric(subdata$x))), y=runif(40, min = min(subdata$y), max = max(subdata$y)), category = rep("0", 40))
+
+final_fake_data<-subdata %>%
+  select(-dataset) 
+
+final_fake_data <-rbind(final_fake_data,fake_data)
+
+final_fake_data$x<-gsub("[.]", ",",final_fake_data$x)
+
+final_fake_data[146,]<-NA
+  
+ggplot(final_fake_data, aes(x = x, y = y)) +
+geom_point(pch = "circle", color = "red", size = 2) +
+theme_bw() +
+theme(legend.position = "none") 
+
+write.table(final_fake_data,"example_data_to_clean.txt", sep="\t")
+```
+
+What to do to transform it back ?
+
+```{r}
+read.table("example_data_to_clean.txt", sep="\t", header = T)
+
+```
