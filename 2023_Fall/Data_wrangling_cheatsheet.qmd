@@ -47,10 +47,3 @@ theme(legend.position = "none")
 
 write.table(final_fake_data,"example_data_to_clean.txt", sep="\t")
 ```
-
-What to do to transform it back ?
-
-```{r}
-read.table("example_data_to_clean.txt", sep="\t", header = T)
-
-```
