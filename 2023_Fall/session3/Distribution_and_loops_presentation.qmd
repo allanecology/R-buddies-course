@@ -1,0 +1,152 @@
+---
+title: "Distributions and loops"
+author: "Caroline"
+format: 
+  revealjs:
+    theme: serif
+date: 11-12-2023
+editor: visual
+---
+
+## Part 1 - Distributions
+
+<br>
+
+### What is a distribution?
+
+
+## Part 1 - Distributions
+
+<br>
+
+### What is a distribution?
+
+A distribution is a curve that describes the probability to encounter the value x for a given variable
+
+```{r}
+#Create a sequence of 100 equally spaced numbers between -4 and 4
+x <- seq(-4, 4, length=100)
+
+#create a vector of values that shows the height of the probability distribution
+#for each value in x
+y <- dnorm(x)
+
+#plot x and y as a scatterplot with connected lines (type = "l") and add
+#an x-axis with custom labels
+plot(x,y, type = "l", lwd = 2, axes = FALSE, xlab = "", ylab = "")
+axis(1, at = -3:3, labels = c("-3", "-2", "-1", "mean", "1", "2", "3"))
+
+```
+
+
+## Part 1 - Distributions
+
+<br>
+
+### What is a distribution?
+
+A distribution is a curve that describes the probability to encounter the value x for a given variable
+
+<br>
+
+### Why do we need to know the distribution of our values?
+
+- To do modelling (test significance)
+- To sample the data randomly
+- To look at correlations
+
+... And many others
+
+## Step 1: Describing the data
+
+```{r, echo=TRUE}
+data<- OrchardSprays
+hist(data$decrease)
+```
+
+## Step 1: Describing the data
+
+You can have a first look, assessing:
+
+- the mean
+- the min
+- the max
+- the variance
+
+## Step 2: Test different possible distributions
+
+```{r, echo=T}
+library("univariateML")
+#?AIC()
+
+test<- AIC(mlbetapr(data$decrease),
+    mlexp(data$decrease),
+    mlinvgamma(data$decrease),
+    mlgamma(data$decrease),
+    mlnorm(data$decrease),
+    mllnorm(data$decrease),
+    mlrayleigh(data$decrease),
+    mlinvgauss(data$decrease),
+    mlweibull(data$decrease),
+    mlinvweibull(data$decrease),
+    mllgamma(data$decrease))
+```
+
+You have a list of all distributions contained in this package at: https://jonasmoss.github.io/univariateML/index.html
+
+
+## Step 2: Test different possible distributions
+
+```{r, echo=T}
+test[order(test$AIC),]
+```
+
+## Step 3: Check the QQplots & densities
+
+```{r, echo=T}
+qqmlplot(data$decrease, mlexp, datax = T, main = "QQplot for Orchard spray reduction")
+
+qqmlpoints(data$decrease, mlexp, datax = T, col = "red")
+qqmlpoints(data$decrease, mlweibull, datax = T, col = "black")
+
+qqmlline(data$decrease, mlexp, datax = T, col = "red")
+
+```
+
+## Step 3: Check the QQplots & densities
+
+```{r, echo=T}
+
+hist(data$decrease, main = "Orchard spray reduction", freq = FALSE)
+lines(mlweibull(data$decrease), lwd = 2, lty = 2, ylim = c(0, 0.025))
+lines(mlexp(data$decrease), lwd = 2, col = "red")
+rug(data$decrease)
+
+```
+
+## Step 4: Transformation
+
+- Exercise: Use classic transformations in order to make the data more normal, then test it.
+
+## Coffee time!!
+
+::: columns 
+![](pictures/catandcoffee.jpg){fig-align="center"}
+:::
+
+## Part 2 - Loops
+
+<br>
+
+### The three kind of loops
+
+::: columns
+![](pictures/loops.png){fig-align="center"}
+:::
+
+(source: https://universeofdatascience.com/loops-in-r-for-while-repeat/)
+
+## Step 1: Initialisation
+
+
+
