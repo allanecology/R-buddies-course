@@ -148,5 +148,60 @@ rug(data$decrease)
 
 ## Step 1: Initialisation
 
+- All matrix/dataframe must be existing before you start the loop
 
+```{r, eval=F, echo=T}
+#one possibility
+result_data<- matrix(NA, 8,8)
 
+#another possibility if you don't have a good idea what your data.frame 
+#is going to look like
+result_data<- NULL
+```
+
+## Step 1: Initialisation
+
+- All matrix/dataframe must be existing before you start the loop
+- Use i as an index to fill the matrix
+```{r, eval=F, echo=T}
+for (i in 1:nrow(result_data))
+{
+  #Here is step 2: the code block
+}
+```
+
+## Step 2: The code block
+
+- Don't introduce new data frames/variables inside the code block
+
+## Step 2: The code block
+
+- Don't introduce new data frames/variables inside the code block
+- Use your index! (i)
+
+```{r, eval=F, echo=T}
+#don't write
+result_data
+
+#instead, write
+result_data[i]
+#then it uses the value corresponding to the row i
+```
+
+## Step 3: Loop output
+
+- You can use rbind or cbind function (if you used <code>result_data <- NULL</code> in step 1)
+```{r, eval=FALSE, echo=T}
+result_data<-rbind(result_data, code_block_output)
+```
+
+## Step 4: Nested for loop
+
+- Exercise: Let's use again the data from OrchardSprays.
+
+  * You have rowpos (i), colpos (j): make a loop within a loop that will fill a matrix of 8 x 8 cells, with the decrease variable corresponding to the row and column position 
+  * If you have more time, ggplot it!
+  
+```{r, echo=FALSE}
+head(data)
+```
