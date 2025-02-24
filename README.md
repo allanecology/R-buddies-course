@@ -1,8 +1,10 @@
 # R-buddies-course
 
-### - Fall semester 2023 (current)
+### - Spring semester 2025 (current)
 
 University of Bern course, improving programming habits, discussing programming and analysis skills and having a discussion about R!
+
+### - Fall semester 2023
 
 ### - Spring semester 2023
 
