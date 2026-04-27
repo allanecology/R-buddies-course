@@ -14,7 +14,6 @@ editor: visual
 
 ### What is a distribution?
 
-
 ## Part 1 - Distributions
 
 <br>
@@ -38,7 +37,6 @@ axis(1, at = -3:3, labels = c("-3", "-2", "-1", "mean", "1", "2", "3"))
 
 ```
 
-
 ## Part 1 - Distributions
 
 <br>
@@ -51,9 +49,9 @@ A distribution is a curve that describes the probability to encounter the value 
 
 ### Why do we need to know the distribution of our values?
 
-- To do modelling (test significance)
-- To sample the data randomly
-- To look at correlations
+-   To do modelling (test significance)
+-   To sample the data randomly
+-   To look at correlations
 
 ... And many others
 
@@ -68,10 +66,10 @@ hist(data$decrease)
 
 You can have a first look, assessing:
 
-- the mean
-- the min
-- the max
-- the variance
+-   the mean
+-   the min
+-   the max
+-   the variance
 
 ## Step 2: Test different possible distributions
 
@@ -93,7 +91,6 @@ test<- AIC(mlbetapr(data$decrease),
 ```
 
 You have a list of all distributions contained in this package at: https://jonasmoss.github.io/univariateML/index.html
-
 
 ## Step 2: Test different possible distributions
 
@@ -126,11 +123,11 @@ rug(data$decrease)
 
 ## Step 4: Transformation
 
-- Exercise: Use classic transformations in order to make the data more normal, then test it.
+-   Exercise: Use classic transformations in order to make the data more normal, then test it.
 
 ## Coffee time!!
 
-::: columns 
+::: columns
 ![](pictures/catandcoffee.jpg){fig-align="center"}
 :::
 
@@ -148,7 +145,7 @@ rug(data$decrease)
 
 ## Step 1: Initialisation
 
-- All matrix/dataframe must be existing before you start the loop
+-   All matrix/dataframe must be existing before you start the loop
 
 ```{r, eval=F, echo=T}
 #one possibility
@@ -161,8 +158,9 @@ result_data<- NULL
 
 ## Step 1: Initialisation
 
-- All matrix/dataframe must be existing before you start the loop
-- Use i as an index to fill the matrix
+-   All matrix/dataframe must be existing before you start the loop
+-   Use i as an index to fill the matrix
+
 ```{r, eval=F, echo=T}
 for (i in 1:nrow(result_data))
 {
@@ -172,12 +170,12 @@ for (i in 1:nrow(result_data))
 
 ## Step 2: The code block
 
-- Don't introduce new data frames/variables inside the code block
+-   Don't introduce new data frames/variables inside the code block
 
 ## Step 2: The code block
 
-- Don't introduce new data frames/variables inside the code block
-- Use your index! (i)
+-   Don't introduce new data frames/variables inside the code block
+-   Use your index! (i)
 
 ```{r, eval=F, echo=T}
 #don't write
@@ -190,18 +188,19 @@ result_data[i]
 
 ## Step 3: Loop output
 
-- You can use rbind or cbind function (if you used <code>result_data <- NULL</code> in step 1)
+-   You can use rbind or cbind function (if you used <code>result_data \<- NULL</code> in step 1)
+
 ```{r, eval=FALSE, echo=T}
 result_data<-rbind(result_data, code_block_output)
 ```
 
 ## Step 4: Nested for loop
 
-- Exercise: Let's use again the data from OrchardSprays.
+-   Exercise: Let's use again the data from OrchardSprays.
 
-  * You have rowpos (i), colpos (j): make a loop within a loop that will fill a matrix of 8 x 8 cells, with the decrease variable corresponding to the row and column position 
-  * If you have more time, ggplot it!
-  
+    -   You have rowpos (i), colpos (j): make a loop within a loop that will fill a matrix of 8 x 8 cells, with the decrease variable corresponding to the row and column position
+    -   If you have more time, ggplot it!
+
 ```{r, echo=FALSE}
 head(data)
 ```
